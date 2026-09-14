@@ -318,7 +318,7 @@
     <div class="result-section" id="resultBox">
       <div class="result-badges">
         <span class="tag-badge" id="resCategory">Recomendación</span>
-        <span class="tag-badge tag-alt" id="resCounter">Opción 1 de 10</span>
+        <span class="tag-badge tag-alt" id="resCounter">Opción 1 de 20</span>
       </div>
       
       <h2 class="book-title" id="resTitle">Título del Libro</h2>
@@ -478,7 +478,8 @@
       });
 
       rankedRecommendations.sort((a, b) => b.matchScore - a.matchScore);
-      rankedRecommendations = rankedRecommendations.slice(0, 15);
+      // Ampliado a 20 opciones para aprovechar el catálogo grande
+      rankedRecommendations = rankedRecommendations.slice(0, 20);
 
       currentRecIndex = 0;
       document.getElementById("quizBox").style.display = "none";
