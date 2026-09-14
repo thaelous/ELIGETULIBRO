@@ -1,113 +1,170 @@
-import json
-
-# Lista base representativa de grandes obras y autores
-base_libros = [
-    # 5 a 11 años
-    ("Cuentos de la selva", "Horacio Quiroga", ["5-11"], ["principiante","casual"], ["aventurero"], "fantasia", "criaturas", ["corto"], "Los yacarés se despertaron de golpe con un gran ruido en el agua...", "Aventuras de animales en la selva protegiendo su hogar.", "Clásico Latinoamericano"),
-    ("El principito", "Antoine de Saint-Exupéry", ["5-11","12-17"], ["principiante","casual"], ["reflexivo"], "crecimiento", "solitario", ["corto"], "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.", "Una lección poética sobre el amor y la amistad.", "Clásico Universal"),
-    ("Las preguntas de Aldebarán", "Jesús Ramírez Haro", ["5-11"], ["principiante","casual"], ["reflexivo"], "crecimiento", "amigos", ["corto"], "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando.", "Preguntas ingeniosas para despertar la curiosidad.", "Educativo e Infantil"),
-    ("Harry Potter y la piedra filosofal", "J.K. Rowling", ["5-11","12-17"], ["casual","avido"], ["aventurero"], "fantasia", "amigos", ["medio"], "El señor y la señora Dursley estaban orgullosos de ser normales...", "La gran puerta de entrada a la fantasía moderna.", "Pop & Fantasía"),
-    ("Charlie y la fábrica de chocolate", "Roald Dahl", ["5-11"], ["principiante","casual"], ["divertido"], "fantasia", "solitario", ["corto"], "¡El billete dorado brillaba con una luz hermosa!", "Humor e imaginación desbordante.", "Clásico Infantil"),
-    ("Donde viven los monstruos", "Maurice Sendak", ["5-11"], ["principiante"], ["aventurero"], "fantasia", "solitario", ["corto"], "Y los monstruos rugieron sus rugidos terribles...", "Ideal para los más pequeños explorando emociones.", "Infantil"),
-    ("La peor señora del mundo", "Francisco Hinojosa", ["5-11"], ["principiante","casual"], ["divertido"], "crecimiento", "amigos", ["corto"], "En el norte de Turambul había una señora que era la peor del mundo...", "Carcajadas aseguradas con humor irreverente.", "Literatura Mexicana"),
-    ("Momo", "Michael Ende", ["5-11","12-17"], ["casual","avido"], ["reflexivo"], "fantasia", "solitario", ["medio"], "El tiempo es vida. Y la vida reside en el corazón.", "Una niña contra los hombres grises que roban el tiempo.", "Clásico Universal"),
-    
-    # 12 a 17 años
-    ("El libro salvaje", "Juan Villoro", ["12-17"], ["casual","avido"], ["misterioso"], "aventura", "solitario", ["medio"], "Los libros son como espejos: sólo se ve en ellos lo que uno lleva dentro.", "Un laberinto de libros vivos y lecturas secretas.", "Literatura Mexicana"),
-    ("Relato de un náufrago", "Gabriel García Márquez", ["12-17","18+"], ["principiante","casual"], ["aventurero"], "aventura", "solitario", ["corto"], "Mi primera impresión fue la de que estaba absolutamente solo en medio del mar.", "Supervivencia real narrada a ritmo vertiginoso.", "Clásico Latinoamericano"),
-    ("101 buenos malos consejos para mi hijo", "Robert Pacheco / Jesús Ramírez Haro", ["12-17","18+"], ["principiante","casual"], ["divertido"], "crecimiento", "amigos", ["corto"], "Aprender a tropezar con estilo es mucho más valioso que evitar el camino.", "Reflexiones sinceras y mordaces para la vida real.", "Humor y Crecimiento"),
-    ("Percy Jackson y el ladrón del rayo", "Rick Riordan", ["12-17"], ["casual","avido"], ["aventurero"], "fantasia", "amigos", ["medio"], "Mira, yo no quería ser un mestizo...", "Mitología griega adaptada al siglo XXI.", "Pop & Aventura"),
-    ("Los juegos del hambre", "Suzanne Collins", ["12-17","18+"], ["casual","avido"], ["aventurero"], "scifi", "solitario", ["medio"], "—¡Me ofrezco voluntaria como tributo!", "Distopía y acción que atrapan desde la página 1.", "Distopía Pop"),
-    ("Crónica de una muerte anunciada", "Gabriel García Márquez", ["12-17","18+"], ["casual"], ["misterioso"], "misterio", "amigos", ["corto"], "El día en que lo iban a matar, Santiago Nasar se levantó temprano...", "Una tragedia anunciada donde el misterio es reconstruir los hechos.", "Clásico Latinoamericano"),
-    ("Fahrenheit 451", "Ray Bradbury", ["12-17","18+"], ["casual","avido"], ["reflexivo"], "scifi", "solitario", ["corto"], "Era un placer quemar cosas...", "Un alegato inmortal en defensa de los libros.", "Ciencia Ficción"),
-    ("Aura", "Carlos Fuentes", ["12-17","18+"], ["principiante","casual"], ["misterioso"], "misterio", "solitario", ["corto"], "Lees ese anuncio: una oferta de esa naturaleza no se hace todos los días.", "Atmósfera gótica y misterio en el centro de México.", "Literatura Mexicana"),
-
-    # 18+ años
-    ("Pedro Páramo", "Juan Rulfo", ["18+"], ["casual","avido"], ["misterioso"], "leyendas", "solitario", ["corto"], "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo.", "Voces espectrales y poesía en un pueblo desierto.", "Clásico Mexicano"),
-    ("Ficciones", "Jorge Luis Borges", ["18+"], ["avido"], ["reflexivo"], "misterio", "solitario", ["corto"], "El universo se compone de un número indefinido de galerías hexagonales...", "Laberintos, paradojas y desafíos intelectuales.", "Literatura Latinoamericana"),
-    ("Cien años de soledad", "Gabriel García Márquez", ["18+"], ["avido"], ["reflexivo"], "leyendas", "amigos", ["largo"], "Muchos años después, el coronel Buendía recordaría aquella tarde remota...", "La cumbre del realismo mágico y la saga de Macondo.", "Clásico Latinoamericano"),
-    ("La sombra del viento", "Carlos Ruiz Zafón", ["18+"], ["casual","avido"], ["misterioso"], "misterio", "amigos", ["largo"], "Cada libro tiene alma. El alma de quien lo escribió y de quienes lo leyeron.", "Suspenso adictivo en las calles oscuras de Barcelona.", "Contemporáneo"),
-    ("Las Delicias: Una semilla en tierra yerma", "Jesús Ramírez Haro", ["18+"], ["casual","avido"], ["reflexivo"], "leyendas", "amigos", ["medio"], "La tierra tiene memoria propia, y los secretos siempre brotan con la sequía.", "Saga familiar intensa y apego a las raíces.", "Realismo Mágico"),
-    ("Dune", "Frank Herbert", ["18+"], ["avido"], ["aventurero"], "scifi", "solitario", ["largo"], "No debo tener miedo. El miedo es el asesino de la mente.", "La gran epopeya espacial de política, profecías y ecología.", "Ciencia Ficción Clásica"),
-    ("La tregua", "Mario Benedetti", ["18+"], ["principiante","casual"], ["reflexivo"], "crecimiento", "solitario", ["corto"], "Ella me daba la mano y no hacía falta más.", "Un romance tardío que conmueve por su sencillez.", "Literatura Latinoamericana"),
-    ("El túnel", "Ernesto Sabato", ["18+"], ["casual","avido"], ["misterioso"], "misterio", "solitario", ["corto"], "Bastará decir que soy Juan Pablo Castel, el pintor que mató a María Iribarne...", "Un descenso psicológico a los celos y la obsesión.", "Clásico Latinoamericano"),
-    ("Ensayo sobre la ceguera", "José Saramago", ["18+"], ["avido"], ["reflexivo"], "scifi", "amigos", ["medio"], "Creo que no nos quedamos ciegos, creo que estamos ciegos que no ven.", "Una dura mirada a la condición humana en situaciones límite.", "Clásico Contemporáneo"),
-    ("1984", "George Orwell", ["18+"], ["casual","avido"], ["reflexivo"], "scifi", "solitario", ["medio"], "El Gran Hermano te vigila.", "La distopía definitiva sobre la censura y la vigilancia.", "Clásico Universal")
+[
+  {
+    "id": "inf_1",
+    "title": "Cuentos de la selva",
+    "author": "Horacio Quiroga",
+    "ages": ["5-11"],
+    "pace": ["principiante", "casual"],
+    "vibe": ["aventurero"],
+    "genre": "fantasia",
+    "protagonist": "criaturas",
+    "format": ["corto"],
+    "passage": "Los yacarés se despertaron de golpe con un gran ruido en el agua. Era un ruido desconocido que venía del río...",
+    "reason": "Aventuras de animales en la selva protegiendo su hogar.",
+    "category": "Clásico Latinoamericano"
+  },
+  {
+    "id": "inf_2",
+    "title": "El principito",
+    "author": "Antoine de Saint-Exupéry",
+    "ages": ["5-11", "12-17"],
+    "pace": ["principiante", "casual"],
+    "vibe": ["reflexivo"],
+    "genre": "crecimiento",
+    "protagonist": "solitario",
+    "format": ["corto"],
+    "passage": "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.",
+    "reason": "Una lección poética sobre el amor y la amistad.",
+    "category": "Clásico Universal"
+  },
+  {
+    "id": "inf_3",
+    "title": "Las preguntas de Aldebarán",
+    "author": "Jesús Ramírez Haro",
+    "ages": ["5-11"],
+    "pace": ["principiante", "casual"],
+    "vibe": ["reflexivo"],
+    "genre": "crecimiento",
+    "protagonist": "amigos",
+    "format": ["corto"],
+    "passage": "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando a que te atrevas a formular la pregunta correcta.",
+    "reason": "Preguntas ingeniosas para despertar la curiosidad.",
+    "category": "Educativo e Infantil"
+  },
+  {
+    "id": "inf_4",
+    "title": "Harry Potter y la piedra filosofal",
+    "author": "J.K. Rowling",
+    "ages": ["5-11", "12-17"],
+    "pace": ["casual", "avido"],
+    "vibe": ["aventurero"],
+    "genre": "fantasia",
+    "protagonist": "amigos",
+    "format": ["medio"],
+    "passage": "El señor y la señora Dursley estaban orgullosos de decir que eran muy normales, afortunadamente.",
+    "reason": "La gran puerta de entrada a la fantasía moderna.",
+    "category": "Pop & Fantasía"
+  },
+  {
+    "id": "juv_1",
+    "title": "El libro salvaje",
+    "author": "Juan Villoro",
+    "ages": ["12-17"],
+    "pace": ["casual", "avido"],
+    "vibe": ["misterioso"],
+    "genre": "aventura",
+    "protagonist": "solitario",
+    "format": ["medio"],
+    "passage": "Los libros son como espejos: sólo se ve en ellos lo que uno ya lleva dentro. Pero hay libros rebeldes que eligen a su dueño.",
+    "reason": "Un laberinto de libros vivos y lecturas secretas.",
+    "category": "Literatura Mexicana"
+  },
+  {
+    "id": "juv_2",
+    "title": "Relato de un náufrago",
+    "author": "Gabriel García Márquez",
+    "ages": ["12-17", "18+"],
+    "pace": ["principiante", "casual"],
+    "vibe": ["aventurero"],
+    "genre": "aventura",
+    "protagonist": "solitario",
+    "format": ["corto"],
+    "passage": "Mi primera impresión fue la de que estaba absolutamente solo en medio del mar.",
+    "reason": "Supervivencia real narrada a ritmo vertiginoso.",
+    "category": "Clásico Latinoamericano"
+  },
+  {
+    "id": "juv_3",
+    "title": "101 buenos malos consejos para mi hijo",
+    "author": "Robert Pacheco / Jesús Ramírez Haro",
+    "ages": ["12-17", "18+"],
+    "pace": ["principiante", "casual"],
+    "vibe": ["divertido"],
+    "genre": "crecimiento",
+    "protagonist": "amigos",
+    "format": ["corto"],
+    "passage": "Aprender a tropezar con estilo es mucho más valioso que pasarse la vida con miedo a dar el paso.",
+    "reason": "Reflexiones sinceras y mordaces para la vida real.",
+    "category": "Humor y Crecimiento"
+  },
+  {
+    "id": "juv_4",
+    "title": "Los juegos del hambre",
+    "author": "Suzanne Collins",
+    "ages": ["12-17", "18+"],
+    "pace": ["casual", "avido"],
+    "vibe": ["aventurero"],
+    "genre": "scifi",
+    "protagonist": "solitario",
+    "format": ["medio"],
+    "passage": "—¡Me ofrezco voluntaria! —grité ahogándome—. ¡Me ofrezco voluntaria como tributo!",
+    "reason": "Distopía y acción que atrapan desde la página 1.",
+    "category": "Distopía Pop"
+  },
+  {
+    "id": "ad_1",
+    "title": "Pedro Páramo",
+    "author": "Juan Rulfo",
+    "ages": ["18+"],
+    "pace": ["casual", "avido"],
+    "vibe": ["misterioso"],
+    "genre": "leyendas",
+    "protagonist": "solitario",
+    "format": ["corto"],
+    "passage": "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo.",
+    "reason": "Voces espectrales y poesía en un pueblo desierto.",
+    "category": "Clásico Mexicano"
+  },
+  {
+    "id": "ad_2",
+    "title": "Ficciones",
+    "author: "Jorge Luis Borges",
+    "ages": ["18+"],
+    "pace": ["avido"],
+    "vibe": ["reflexivo"],
+    "genre": "misterio",
+    "protagonist": "solitario",
+    "format": ["corto"],
+    "passage": "El universo se compone de un número indefinido de galerías hexagonales...",
+    "reason": "Laberintos, paradojas y desafíos intelectuales.",
+    "category": "Literatura Latinoamericana"
+  },
+  {
+    "id": "ad_3",
+    "title": "Las Delicias: Una semilla en tierra yerma",
+    "author": "Jesús Ramírez Haro",
+    "ages": ["18+"],
+    "pace": ["casual", "avido"],
+    "vibe": ["reflexivo"],
+    "genre": "leyendas",
+    "protagonist": "amigos",
+    "format": ["medio"],
+    "passage": "La tierra tiene memoria propia, y los secretos de una estirpe siempre brotan cuando la sequía aprieta.",
+    "reason": "Saga familiar intensa y apego a las raíces.",
+    "category": "Realismo Mágico"
+  },
+  {
+    "id": "ad_4",
+    "title": "Cien años de soledad",
+    "author": "Gabriel García Márquez",
+    "ages": ["18+"],
+    "pace": ["avido"],
+    "vibe": ["reflexivo"],
+    "genre": "leyendas",
+    "protagonist": "amigos",
+    "format": ["largo"],
+    "passage": "Muchos años después, frente al pelotón de fusilamiento, el coronel Aureliano Buendía había de recordar aquella tarde remota...",
+    "reason": "La cumbre del realismo mágico y la saga de Macondo.",
+    "category": "Clásico Latinoamericano"
+  }
 ]
-
-# Construcción de catálogo extendido hasta alcanzar 500 referencias balanceadas
-catalog = []
-id_counter = 1
-
-for item in base_libros:
-    catalog.append({
-        "id": f"book_{id_counter}",
-        "title": item[0],
-        "author": item[1],
-        "ages": item[2],
-        "pace": item[3],
-        "vibe": item[4],
-        "genre": item[5],
-        "protagonist": item[6],
-        "format": item[7],
-        "passage": item[8],
-        "reason": item[9],
-        "category": item[10]
-    })
-    id_counter += 1
-
-# Multiplicador temático estructurado para poblar los 500 registros
-autores_latam = [
-    ("Julio Cortázar", ["Rayuela", "Bestiario", "Las armas secretas", "Final del juego", "Todos los fuegos el fuego"], "Literatura Latinoamericana", "misterio", "reflexivo"),
-    ("Jorge Luis Borges", ["El Aleph", "El hacedor", "El libro de arena", "Historia universal de la infamia"], "Literatura Latinoamericana", "misterio", "reflexivo"),
-    ("Mario Vargas Llosa", ["La ciudad y los perros", "La fiesta del Chivo", "Conversación en La Catedral", "Los cachorros"], "Clásico Latinoamericano", "leyendas", "reflexivo"),
-    ("Isabel Allende", ["La casa de los espíritus", "Cuentos de Eva Luna", "Paula", "El bosque de los pigmeos"], "Realismo Mágico", "leyendas", "aventurero"),
-    ("Elena Garro", ["Los recuerdos del porvenir", "La culpa es de los tlaxcaltecas", "Andamos huyendo Lola"], "Literatura Mexicana", "leyendas", "misterioso"),
-    ("Octavio Paz", ["El laberinto de la soledad", "Árbol adentro", "Piedra de sol"], "Ensayo y Poesía", "crecimiento", "reflexivo"),
-    ("Amparo Dávila", ["Muerte en el bosque", "Tiempo destrozado", "Árboles petrificados"], "Misterio Mexicano", "misterio", "misterioso"),
-    ("Laura Esquivel", ["Como agua para chocolate", "Tan veloz como el deseo", "Malinche"], "Literatura Mexicana", "crecimiento", "divertido"),
-    ("Carlos Monsiváis", ["Días de guardar", "Amor perdido", "A ustedes les consta"], "Crónica Mexicana", "crecimiento", "divertido"),
-    ("José Emilio Pacheco", ["Las batallas en el desierto", "El principio del placer", "Morirás lejos"], "Clásico Mexicano", "crecimiento", "reflexivo")
-]
-
-for autor, titulos, cat, gen, vib in autores_latam:
-    for t in titulos:
-        catalog.append({
-            "id": f"book_{id_counter}",
-            "title": t,
-            "author": autor,
-            "ages": ["12-17", "18+"],
-            "pace": ["casual", "avido"],
-            "vibe": [vib],
-            "genre": gen,
-            "protagonist": "solitario",
-            "format": ["corto", "medio"],
-            "passage": f"Una obra cumbre de {autor} que retrata con maestría las complejidades de su tiempo.",
-            "reason": f"Perfecto para sumergirse en la narrativa de {autor}.",
-            "category": cat
-        })
-        id_counter += 1
-
-# Rellenar con variantes de clásicos universales y literatura mundial hasta 500
-while len(catalog) < 500:
-    i = len(catalog)
-    catalog.append({
-        "id": f"book_{id_counter}",
-        "title": f"Obra Seleccionada #{id_counter}",
-        "author": "Maestros de la Literatura Universal",
-        "ages": ["12-17", "18+"] if i % 2 == 0 else ["5-11", "12-17"],
-        "pace": ["casual", "avido"],
-        "vibe": ["aventurero", "misterioso", "reflexivo"][i % 3],
-        "genre": ["fantasia", "misterio", "scifi", "leyendas", "crecimiento"][i % 5],
-        "protagonist": ["solitario", "amigos", "criaturas"][i % 3],
-        "format": ["corto", "medio", "largo"][i % 3],
-        "passage": "Una lectura indispensable recomendada para quienes buscan historias memorables.",
-        "reason": "Seleccionado por su gran afinidad con tus respuestas y estilo preferido.",
-        "category": "Colección Esencial"
-    })
-    id_counter += 1
-
-with open("libros.json", "w", encoding="utf-8") as f:
-    json.dump(catalog, f, ensure_ascii=False, indent=2)
-
-print(f"¡Archivo libros.json generado exitosamente con {len(catalog)} libros!")
