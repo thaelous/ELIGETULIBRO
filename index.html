@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu Próxima Lectura | Brújula de Libros</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: var(--border);
+      border-radius: 999px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 25%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .question-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-option {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 1rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-option:hover {
+      border-color: var(--accent);
+      background-color: #172554;
+      transform: translateY(-2px);
+    }
+
+    /* Tarjeta de resultado */
+    .result-card {
+      display: none;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .book-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .book-author {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .quote-box {
+      background: #0f172a;
+      border-left: 4px solid var(--accent);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .why-box {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .btn-action {
+      display: inline-block;
+      width: 100%;
+      text-decoration: none;
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 700;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: background 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .btn-action:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-restart {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 8px;
+    }
+
+    .btn-restart:hover {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Brújula Literaria</h1>
+      <p>Descubre tu siguiente historia sin rodeos</p>
+    </div>
+
+    <div class="progress-bar-container" id="progressBarContainer">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Contenedor del Cuestionario -->
+    <div id="quizContainer">
+      <div class="question-box">
+        <h2 id="questionText">Cargando...</h2>
+        <div class="options-grid" id="optionsContainer"></div>
+      </div>
+    </div>
+
+    <!-- Contenedor del Resultado -->
+    <div class="result-card" id="resultContainer">
+      <span class="badge" id="resGenre">Recomendación</span>
+      <h2 class="book-title" id="resTitle">Título del Libro</h2>
+      <p class="book-author" id="resAuthor">por Autor</p>
+      
+      <div class="quote-box">
+        <p id="resPassage">"Pasaje del libro..."</p>
+      </div>
+
+      <p class="why-box" id="resReason">Por qué te gustará...</p>
+
+      <a href="#" target="_blank" class="btn-action" id="resLink">Ver en Google Play Libros</a>
+      <br />
+      <button class="btn-restart" onclick="restartQuiz()">Probar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Catálogo estático local sin costos de API
+    const books = [
+      // 5 a 11 años
+      {
+        id: "inf_1",
+        title: "Cuentos de la selva",
+        author: "Horacio Quiroga",
+        ages: ["5-11"],
+        pace: ["principiante", "casual"],
+        genre: "aventura",
+        character: "criaturas",
+        passage: "Los yacarés se despertaron de golpe con un gran ruido en el agua. Era un ruido desconocido que venía del río...",
+        reason: "Relatos rápidos llenos de animales astutos, aventuras salvajes y naturaleza pura.",
+        query: "Cuentos de la selva Horacio Quiroga"
+      },
+      {
+        id: "inf_2",
+        title: "El principito",
+        author: "Antoine de Saint-Exupéry",
+        ages: ["5-11", "12-17"],
+        pace: ["casual", "avido"],
+        genre: "crecimiento",
+        character: "solitario",
+        passage: "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.",
+        reason: "Un viaje inolvidable por mundos pequeños para descubrir el valor de la amistad y la curiosidad.",
+        query: "El principito Antoine de Saint-Exupéry"
+      },
+      {
+        id: "inf_3",
+        title: "Las preguntas de Aldebarán",
+        author: "Jesús Ramírez Haro",
+        ages: ["5-11"],
+        pace: ["principiante", "casual"],
+        genre: "crecimiento",
+        character: "amigos",
+        passage: "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando a que te atrevas a preguntar.",
+        reason: "Ideal para mentes inquietas que nunca se cansan de explorar el porqué de las cosas.",
+        query: "Las preguntas de Aldebaran"
+      },
+      {
+        id: "inf_4",
+        title: "Harry Potter y la piedra filosofal",
+        author: "J.K. Rowling",
+        ages: ["5-11", "12-17"],
+        pace: ["casual", "avido"],
+        genre: "aventura",
+        character: "amigos",
+        passage: "El señor y la señora Dursley, de Privet Drive número 4, estaban orgullosos de decir que eran muy normales, afortunadamente.",
+        reason: "La puerta de entrada ideal a una saga mágica llena de misterio, lealtad y peligros.",
+        query: "Harry Potter y la piedra filosofal"
+      },
+
+      // 12 a 17 años
+      {
+        id: "juv_1",
+        title: "El libro salvaje",
+        author: "Juan Villoro",
+        ages: ["12-17"],
+        pace: ["casual", "avido"],
+        genre: "misterio",
+        character: "solitario",
+        passage: "Los libros son como espejos: sólo se ve en ellos lo que uno ya lleva dentro. Pero hay libros rebeldes que eligen a su dueño.",
+        reason: "Una aventura en una biblioteca laberíntica donde los libros cobran vida y guardan secretos.",
+        query: "El libro salvaje Juan Villoro"
+      },
+      {
+        id: "juv_2",
+        title: "Relato de un náufrago",
+        author: "Gabriel García Márquez",
+        ages: ["12-17", "18+"],
+        pace: ["principiante", "casual"],
+        genre: "aventura",
+        character: "solitario",
+        passage: "Mi primera impresión fue la de que estaba absolutamente solo en medio del mar. El sol abrasador y la soledad total.",
+        reason: "Una historia real, directa y trepidante que se lee de un tirón.",
+        query: "Relato de un naufrago Gabriel Garcia Marquez"
+      },
+      {
+        id: "juv_3",
+        title: "101 buenos malos consejos para mi hijo",
+        author: "Jesús Ramírez Haro",
+        ages: ["12-17", "18+"],
+        pace: ["principiante", "casual"],
+        genre: "crecimiento",
+        character: "amigos",
+        passage: "Aprender a tropezar con estilo es casi más útil que evitar las piedras del camino.",
+        reason: "Reflexiones sinceras, humor irreverente y lecciones prácticas para enfrentar la vida sin solemnidades.",
+        query: "101 buenos malos consejos para mi hijo"
+      },
+      {
+        id: "juv_4",
+        title: "Percy Jackson y el ladrón del rayo",
+        author: "Rick Riordan",
+        ages: ["12-17"],
+        pace: ["casual", "avido"],
+        genre: "aventura",
+        character: "criaturas",
+        passage: "Mira, yo no quería ser un mestizo. Si estás leyendo esto porque crees que podrías serlo, cierra el libro ahora mismo.",
+        reason: "Mitología clásica traída a toda velocidad al mundo moderno con humor y acción sin descanso.",
+        query: "Percy Jackson y el ladron del rayo"
+      },
+
+      // 18 años o más
+      {
+        id: "ad_1",
+        title: "Pedro Páramo",
+        author: "Juan Rulfo",
+        ages: ["18+"],
+        pace: ["casual", "avido"],
+        genre: "leyendas",
+        character: "solitario",
+        passage: "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo. Un pueblo lleno de murmullos y ecos.",
+        reason: "Una cumbre de la literatura mexicana: atmósfera espectral, voces del más allá y poesía pura.",
+        query: "Pedro Paramo Juan Rulfo"
+      },
+      {
+        id: "ad_2",
+        title: "Ficciones",
+        author: "Jorge Luis Borges",
+        ages: ["18+"],
+        pace: ["avido"],
+        genre: "misterio",
+        character: "solitario",
+        passage: "El universo (que otros llaman la Biblioteca) se compone de un número indefinido, y tal vez infinito, de galerías hexagonales...",
+        reason: "Para lectores audaces que disfrutan laberintos mentales, espejos, paradojas y acertijos.",
+        query: "Ficciones Jorge Luis Borges"
+      },
+      {
+        id: "ad_3",
+        title: "La sombra del viento",
+        author: "Carlos Ruiz Zafón",
+        ages: ["18+"],
+        pace: ["casual", "avido"],
+        genre: "misterio",
+        character: "amigos",
+        passage: "Cada libro, cada tomo que ves, tiene alma. El alma de quien lo escribió y el alma de quienes lo leyeron y vivieron y soñaron con él.",
+        reason: "Intriga gótica, suspenso y secretos literarios en las calles oscuras de Barcelona.",
+        query: "La sombra del viento Carlos Ruiz Zafon"
+      },
+      {
+        id: "ad_4",
+        title: "Las Delicias: Una semilla en tierra yerma",
+        author: "Jesús Ramírez Haro",
+        ages: ["18+"],
+        pace: ["casual", "avido"],
+        genre: "leyendas",
+        character: "amigos",
+        passage: "La tierra tiene memoria propia, y los secretos de una estirpe siempre brotan cuando la sequía aprieta.",
+        reason: "Realismo mágico íntimo y el pulso vibrante de una saga generacional que marca el destino.",
+        query: "Las Delicias Una semilla en tierra yerma"
+      }
+    ];
+
+    // Preguntas del cuestionario
+    const questions = [
+      {
+        key: "age",
+        text: "¿Cuál es tu rango de edad?",
+        options: [
+          { label: "De 5 a 11 años", value: "5-11" },
+          { label: "De 12 a 17 años", value: "12-17" },
+          { label: "18 años o más", value: "18+" }
+        ]
+      },
+      {
+        key: "pace",
+        text: "¿Cuál es tu experiencia o ritmo de lectura?",
+        options: [
+          { label: "Apenas empiezo / Me canso rápido", value: "principiante" },
+          { label: "Lector casual (historias ágiles)", value: "casual" },
+          { label: "Devorador de libros (historias complejas)", value: "avido" }
+        ]
+      },
+      {
+        key: "genre",
+        text: "¿Qué tipo de historia te llama la atención hoy?",
+        options: [
+          { label: "Aventura, acción y mundos fantásticos", value: "aventura" },
+          { label: "Misterio, enigmas y secretos", value: "misterio" },
+          { label: "Crecimiento, humor y vida cotidiana", value: "crecimiento" },
+          { label: "Leyendas, historia y realismo mágico", value: "leyendas" }
+        ]
+      },
+      {
+        key: "character",
+        text: "¿A quién te gustaría acompañar como protagonista?",
+        options: [
+          { label: "A un grupo de amigos o compañeros valientes", value: "amigos" },
+          { label: "A un personaje solitario descubriendo su destino", value: "solitario" },
+          { label: "A seres mágicos, criaturas o mitos", value: "criaturas" }
+        ]
+      }
+    ];
+
+    let currentStep = 0;
+    const userAnswers = {};
+
+    function renderQuestion() {
+      const q = questions[currentStep];
+      document.getElementById("questionText").textContent = q.text;
+      
+      const progressPercent = ((currentStep + 1) / questions.length) * 100;
+      document.getElementById("progressBar").style.width = progressPercent + "%";
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "btn-option";
+        btn.innerHTML = `<span>${opt.label}</span> <span>→</span>`;
+        btn.onclick = () => selectOption(q.key, opt.value);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectOption(key, value) {
+      userAnswers[key] = value;
+      currentStep++;
+
+      if (currentStep < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quizContainer").style.display = "none";
+      document.getElementById("progressBarContainer").style.display = "none";
+      document.getElementById("resultContainer").style.display = "block";
+
+      // Filtro con sistema de puntuación para asegurar la coincidencia más cercana
+      let matches = books.filter(b => b.ages.includes(userAnswers.age));
+      
+      if (matches.length === 0) {
+        matches = books;
+      }
+
+      // Rankeo de coincidencias
+      matches.sort((a, b) => {
+        let scoreA = 0;
+        let scoreB = 0;
+
+        if (a.pace.includes(userAnswers.pace)) scoreA += 2;
+        if (b.pace.includes(userAnswers.pace)) scoreB += 2;
+
+        if (a.genre === userAnswers.genre) scoreA += 3;
+        if (b.genre === userAnswers.genre) scoreB += 3;
+
+        if (a.character === userAnswers.character) scoreA += 1;
+        if (b.character === userAnswers.character) scoreB += 1;
+
+        return scoreB - scoreA;
+      });
+
+      const chosen = matches[0];
+
+      document.getElementById("resTitle").textContent = chosen.title;
+      document.getElementById("resAuthor").textContent = `por ${chosen.author}`;
+      document.getElementById("resPassage").textContent = `"${chosen.passage}"`;
+      document.getElementById("resReason").textContent = chosen.reason;
+      document.getElementById("resGenre").textContent = chosen.genre.toUpperCase();
+      document.getElementById("resLink").href = `https://play.google.com/store/search?q=${encodeURIComponent(chosen.query)}&c=books`;
+    }
+
+    function restartQuiz() {
+      currentStep = 0;
+      for (let k in userAnswers) delete userAnswers[k];
+      document.getElementById("quizContainer").style.display = "block";
+      document.getElementById("progressBarContainer").style.display = "block";
+      document.getElementById("resultContainer").style.display = "none";
+      renderQuestion();
+    }
+
+    // Iniciar
+    renderQuestion();
+  </script>
+</body>
+</html>
