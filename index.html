@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brújula Literaria | Descubre tu próxima lectura</title>
+  <title>Brújula de Lectura | Descubre tu próxima lectura</title>
   <style>
     :root {
       --bg-gradient: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
@@ -281,6 +281,13 @@
       margin-top: 8px;
       text-decoration: underline;
     }
+
+    .status-msg {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1rem;
+      padding: 40px 0;
+    }
   </style>
 </head>
 <body>
@@ -289,10 +296,10 @@
     <div class="header">
       <span class="icon-banner">🧭</span>
       <h1>Brújula de Lectura</h1>
-      <p id="subHeader">Descubre tu próxima lectura</p>
+      <p>por Robert Pacheco</p>
     </div>
 
-    <div class="progress-wrapper" id="progressWrapper">
+    <div class="progress-wrapper" id="progressWrapper" style="display:none;">
       <div class="progress-meta">
         <span id="stepIndicator">Pregunta 1 de 6</span>
         <span id="stepPercent">16%</span>
@@ -303,7 +310,8 @@
     </div>
 
     <div id="quizBox">
-      <h2 class="question-title" id="questionTitle"></h2>
+      <div id="loadingBox" class="status-msg">Cargando base de datos de libros...</div>
+      <h2 class="question-title" id="questionTitle" style="display:none;"></h2>
       <div class="options-list" id="optionsList"></div>
     </div>
 
@@ -339,365 +347,7 @@
   </div>
 
   <script>
-    // Catálogo embebido directamente para garantizar funcionamiento sin peticiones externas
-    const booksCatalog = [
-      // INFANTIL (5 a 11 años)
-      {
-        title: "Cuentos de la selva",
-        author: "Horacio Quiroga",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        vibe: ["aventurero"],
-        genre: "aventura",
-        protagonist: "criaturas",
-        format: ["corto"],
-        passage: "Los yacarés se despertaron de golpe con un gran ruido en el agua. Era un ruido desconocido que venía del río...",
-        reason: "Relatos ágiles llenos de naturaleza, animales ingeniosos y acción en la selva.",
-        category: "Clásico Latinoamericano"
-      },
-      {
-        title: "El principito",
-        author: "Antoine de Saint-Exupéry",
-        ages: ["5-11", "12-17"],
-        pace: ["principiante", "casual"],
-        vibe: ["reflexivo"],
-        genre: "crecimiento",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.",
-        reason: "Una joya poética universal que habla de la amistad y la pureza de la mirada infantil.",
-        category: "Clásico Universal"
-      },
-      {
-        title: "Las preguntas de Aldebarán",
-        author: "Jesús Ramírez Haro",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        vibe: ["reflexivo", "divertido"],
-        genre: "crecimiento",
-        protagonist: "amigos",
-        format: ["corto"],
-        passage: "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando a que te atrevas a formular la pregunta correcta.",
-        reason: "Ideal para mentes inquietas que buscan respuestas a las grandes dudas cotidianas.",
-        category: "Educativo e Inspirador"
-      },
-      {
-        title: "Harry Potter y la piedra filosofal",
-        author: "J.K. Rowling",
-        ages: ["5-11", "12-17"],
-        pace: ["casual", "avido"],
-        vibe: ["aventurero", "misterioso"],
-        genre: "fantasia",
-        protagonist: "amigos",
-        format: ["medio", "largo"],
-        passage: "El señor y la señora Dursley, de Privet Drive número 4, estaban orgullosos de decir que eran muy normales, afortunadamente.",
-        reason: "La entrada definitiva a un universo de magia, hechicería y amistad a prueba de todo.",
-        category: "Pop & Fantasía"
-      },
-      {
-        title: "Charlie y la fábrica de chocolate",
-        author: "Roald Dahl",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        vibe: ["divertido"],
-        genre: "fantasia",
-        protagonist: "solitario",
-        format: ["corto", "medio"],
-        passage: "¡El billete dorado brillaba con una luz hermosa y resplandeciente en la palma de su mano!",
-        reason: "Humor, dulces fantásticos y lecciones inolvidables para disfrutar sin parar de reír.",
-        category: "Clásico Infantil"
-      },
-      {
-        title: "La peor señora del mundo",
-        author: "Francisco Hinojosa",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        vibe: ["divertido"],
-        genre: "crecimiento",
-        protagonist: "amigos",
-        format: ["corto"],
-        passage: "En el norte de Turambul había una señora que era la peor señora del mundo: mordía a los policías y les ponía chile a los dulces.",
-        reason: "Un clásico contemporáneo mexicano que demuestra que el ingenio vence a la tiranía.",
-        category: "Literatura Mexicana"
-      },
-      {
-        title: "Momo",
-        author: "Michael Ende",
-        ages: ["5-11", "12-17"],
-        pace: ["casual", "avido"],
-        vibe: ["reflexivo"],
-        genre: "fantasia",
-        protagonist: "solitario",
-        format: ["medio"],
-        passage: "El tiempo es vida. Y la vida reside en el corazón. Y cuanto más ahorraba de esto la gente, menos tenía.",
-        reason: "Una niña valiente con el don de escuchar se enfrenta a quienes roban el tiempo ajeno.",
-        category: "Clásico Universal"
-      },
-
-      // JUVENIL (12 a 17 años)
-      {
-        title: "El libro salvaje",
-        author: "Juan Villoro",
-        ages: ["12-17"],
-        pace: ["casual", "avido"],
-        vibe: ["misterioso", "aventurero"],
-        genre: "aventura",
-        protagonist: "solitario",
-        format: ["medio"],
-        passage: "Los libros son como espejos: sólo se ve en ellos lo que uno ya lleva dentro. Pero hay libros rebeldes que eligen a su dueño.",
-        reason: "Una biblioteca infinita donde los libros tienen voluntad propia y esconden secretos.",
-        category: "Literatura Mexicana"
-      },
-      {
-        title: "Relato de un náufrago",
-        author: "Gabriel García Márquez",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        vibe: ["aventurero"],
-        genre: "aventura",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Mi primera impresión fue la de que estaba absolutamente solo en medio del mar. El sol abrasador y la soledad total.",
-        reason: "Una crónica periodística apasionante de supervivencia contra los elementos del Caribe.",
-        category: "Clásico Latinoamericano"
-      },
-      {
-        title: "101 buenos malos consejos para mi hijo",
-        author: "Robert Pacheco / Jesús Ramírez Haro",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        vibe: ["divertido", "reflexivo"],
-        genre: "crecimiento",
-        protagonist: "amigos",
-        format: ["corto", "medio"],
-        passage: "Aprender a tropezar con estilo es mucho más valioso que pasarse la vida con miedo a dar el paso.",
-        reason: "Sentido del humor mordaz y consejos prácticos para aprender a ver el mundo sin rodeos.",
-        category: "Humor y Crecimiento"
-      },
-      {
-        title: "Percy Jackson y el ladrón del rayo",
-        author: "Rick Riordan",
-        ages: ["12-17"],
-        pace: ["casual", "avido"],
-        vibe: ["aventurero"],
-        genre: "fantasia",
-        protagonist: "amigos",
-        format: ["medio", "largo"],
-        passage: "Mira, yo no quería ser un mestizo. Si estás leyendo esto porque crees que podrías serlo, cierra el libro ahora mismo.",
-        reason: "Mitología griega adaptada a un ritmo vertiginoso con héroes jóvenes e irreverentes.",
-        category: "Pop & Aventura"
-      },
-      {
-        title: "Los juegos del hambre",
-        author: "Suzanne Collins",
-        ages: ["12-17", "18+"],
-        pace: ["casual", "avido"],
-        vibe: ["aventurero"],
-        genre: "scifi",
-        protagonist: "solitario",
-        format: ["medio", "largo"],
-        passage: "—¡Me ofrezco voluntaria! —grité ahogándome—. ¡Me ofrezco voluntaria como tributo!",
-        reason: "Suspenso constante, crítica social y tensión desde el primer hasta el último capítulo.",
-        category: "Distopía Pop"
-      },
-      {
-        title: "Crónica de una muerte anunciada",
-        author: "Gabriel García Márquez",
-        ages: ["12-17", "18+"],
-        pace: ["casual", "avido"],
-        vibe: ["misterioso"],
-        genre: "misterio",
-        protagonist: "amigos",
-        format: ["corto"],
-        passage: "El día en que lo iban a matar, Santiago Nasar se levantó a las 5:30 de la mañana para esperar el buque en que llegaba el obispo.",
-        reason: "Un crimen anunciado en un pueblo donde el destino parece sellado por la fatalidad.",
-        category: "Clásico Latinoamericano"
-      },
-      {
-        title: "Fahrenheit 451",
-        author: "Ray Bradbury",
-        ages: ["12-17", "18+"],
-        pace: ["casual", "avido"],
-        vibe: ["reflexivo"],
-        genre: "scifi",
-        protagonist: "solitario",
-        format: ["corto", "medio"],
-        passage: "Era un placer quemar. Era un placer especial ver las cosas consumidas, ver las cosas ennegrecidas y cambiadas.",
-        reason: "Una visión profética sobre la importancia de la lectura y el pensamiento crítico frente a la censura.",
-        category: "Clásico Ciencia Ficción"
-      },
-      {
-        title: "Aura",
-        author: "Carlos Fuentes",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        vibe: ["misterioso"],
-        genre: "misterio",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Lees ese anuncio: una oferta de esa naturaleza no se hace todos los días. Lees y relees el aviso. Parece dirigido a ti.",
-        reason: "Narrada de manera hipnótica en segunda persona, sumerge al lector en un rito de sombras y secretos.",
-        category: "Literatura Mexicana"
-      },
-      {
-        title: "Las batallas en el desierto",
-        author: "José Emilio Pacheco",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        vibe: ["reflexivo"],
-        genre: "crecimiento",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Me enamoré de Mariana. Me enamoré sabiendo que era un amor imposible, pero nada en el mundo podía evitarlo.",
-        reason: "La nostalgia del México de mediados del siglo XX y la intensidad del primer amor clandestino.",
-        category: "Clásico Mexicano"
-      },
-
-      // ADULTOS (18 años o más)
-      {
-        title: "Pedro Páramo",
-        author: "Juan Rulfo",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        vibe: ["misterioso"],
-        genre: "leyendas",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo. Un pueblo lleno de murmullos y ánimas.",
-        reason: "Una de las obras cumbres de México: un viaje poético donde vivos y muertos comparten el mismo espacio.",
-        category: "Clásico Mexicano"
-      },
-      {
-        title: "Ficciones",
-        author: "Jorge Luis Borges",
-        ages: ["18+"],
-        pace: ["avido"],
-        vibe: ["reflexivo", "misterioso"],
-        genre: "misterio",
-        protagonist: "solitario",
-        format: ["corto", "medio"],
-        passage: "El universo (que otros llaman la Biblioteca) se compone de un número indefinido, y tal vez infinito, de galerías hexagonales...",
-        reason: "Relatos breves que funcionan como relojes de precisión sobre espejos, infinitos y laberintos.",
-        category: "Literatura Latinoamericana"
-      },
-      {
-        title: "Cien años de soledad",
-        author: "Gabriel García Márquez",
-        ages: ["18+"],
-        pace: ["avido"],
-        vibe: ["reflexivo", "aventurero"],
-        genre: "leyendas",
-        protagonist: "amigos",
-        format: ["largo"],
-        passage: "Muchos años después, frente al pelotón de fusilamiento, el coronel Aureliano Buendía había de recordar aquella tarde remota...",
-        reason: "La saga definitiva de Macondo y la familia Buendía: realismo mágico en su estado más puro.",
-        category: "Clásico Latinoamericano"
-      },
-      {
-        title: "La sombra del viento",
-        author: "Carlos Ruiz Zafón",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        vibe: ["misterioso"],
-        genre: "misterio",
-        protagonist: "amigos",
-        format: ["medio", "largo"],
-        passage: "Cada libro tiene alma. El alma de quien lo escribió y el alma de quienes lo leyeron, vivieron y soñaron con él.",
-        reason: "Suspenso cautivador en una Barcelona de posguerra envuelta en bruma y misterio bibliófilo.",
-        category: "Contemporáneo Popular"
-      },
-      {
-        title: "Las Delicias: Una semilla en tierra yerma",
-        author: "Jesús Ramírez Haro",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        vibe: ["reflexivo"],
-        genre: "leyendas",
-        protagonist: "amigos",
-        format: ["medio", "largo"],
-        passage: "La tierra tiene memoria propia, y los secretos de una estirpe siempre brotan cuando la sequía aprieta.",
-        reason: "Una intensa saga familiar que explora las raíces, el destino y el apego al terruño.",
-        category: "Realismo Mágico"
-      },
-      {
-        title: "Dune",
-        author: "Frank Herbert",
-        ages: ["18+"],
-        pace: ["avido"],
-        vibe: ["aventurero"],
-        genre: "scifi",
-        protagonist: "solitario",
-        format: ["largo"],
-        passage: "No debo tener miedo. El miedo es el asesino de la mente. El miedo es la pequeña muerte que conduce a la destrucción total.",
-        reason: "La cumbre de la ciencia ficción moderna: intriga dinástica, misticismo y ecología en el desierto de Arrakis.",
-        category: "Ciencia Ficción Clásica"
-      },
-      {
-        title: "La tregua",
-        author: "Mario Benedetti",
-        ages: ["18+"],
-        pace: ["principiante", "casual"],
-        vibe: ["reflexivo"],
-        genre: "crecimiento",
-        protagonist: "solitario",
-        format: ["corto", "medio"],
-        passage: "Ella me daba la mano y no hacía falta más. Me alcanzaba para sentir que era bien acogido.",
-        reason: "Un relato conmovedor sobre la ternura cotidiana y la posibilidad de reencontrar la felicidad.",
-        category: "Literatura Latinoamericana"
-      },
-      {
-        title: "El túnel",
-        author: "Ernesto Sabato",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        vibe: ["misterioso"],
-        genre: "misterio",
-        protagonist: "solitario",
-        format: ["corto"],
-        passage: "Bastará decir que soy Juan Pablo Castel, el pintor que mató a María Iribarne; supongo que el proceso está en la memoria de todos.",
-        reason: "Una exploración punzante de la soledad y la obsesión psicológica contada en primera persona.",
-        category: "Clásico Latinoamericano"
-      },
-      {
-        title: "Ensayo sobre la ceguera",
-        author: "José Saramago",
-        ages: ["18+"],
-        pace: ["avido"],
-        vibe: ["reflexivo"],
-        genre: "scifi",
-        protagonist: "amigos",
-        format: ["medio", "largo"],
-        passage: "Creo que no nos quedamos ciegos, creo que estamos ciegos, ciegos que ven, ciegos que, viendo, no ven.",
-        reason: "Una parábola contundente sobre los límites de la solidaridad y la supervivencia en sociedad.",
-        category: "Clásico Contemporáneo"
-      },
-      {
-        title: "Rayuela",
-        author: "Julio Cortázar",
-        ages: ["18+"],
-        pace: ["avido"],
-        vibe: ["reflexivo"],
-        genre: "crecimiento",
-        protagonist: "solitario",
-        format: ["largo"],
-        passage: "¿Encontraría a la Maga? Tantas veces me había bastado asomarme, viniendo por la rue de Seine, al arco que da al Quai de Conti...",
-        reason: "Un juego vanguardista de múltiples lecturas, jazz y bohemia entre París y Buenos Aires.",
-        category: "Literatura Latinoamericana"
-      },
-      {
-        title: "1984",
-        author: "George Orwell",
-        ages: ["12-17", "18+"],
-        pace: ["casual", "avido"],
-        vibe: ["reflexivo"],
-        genre: "scifi",
-        protagonist: "solitario",
-        format: ["medio"],
-        passage: "El Gran Hermano te vigila. La guerra es la paz. La libertad es la esclavitud. La ignorancia es la fuerza.",
-        reason: "La distopía más influyente sobre el control totalitario y el poder del lenguaje.",
-        category: "Clásico Universal"
-      }
-    ];
+    let booksCatalog = [];
 
     const surveyQuestions = [
       {
@@ -714,36 +364,36 @@
         title: "¿Cuál es tu ritmo de lectura habitual?",
         options: [
           { icon: "🐢", label: "Apenas empiezo / Me canso rápido", value: "principiante" },
-          { icon: "🚶", label: "Lector casual (historias entretenidas y directas)", value: "casual" },
-          { icon: "🚀", label: "Devorador de libros (tramas complejas o profundas)", value: "avido" }
+          { icon: "🚶", label: "Lector casual (historias ágiles y entretenidas)", value: "casual" },
+          { icon: "🚀", label: "Devorador de libros (tramas densas o complejas)", value: "avido" }
         ]
       },
       {
         key: "vibe",
         title: "¿Qué sensación buscas sentir hoy?",
         options: [
-          { icon: "🔥", label: "Adrenalina, tensión y aventura constante", value: "aventurero" },
-          { icon: "🧩", label: "Intriga, secretos y enigmas por resolver", value: "misterioso" },
-          { icon: "💡", label: "Reflexión profunda, poesía o inspiración", value: "reflexivo" },
-          { icon: "🎭", label: "Risas, buen humor o historias cotidianas", value: "divertido" }
+          { icon: "🔥", label: "Adrenalina, tensión y aventura trepidante", value: "aventurero" },
+          { icon: "🧩", label: "Intriga, secretos y ganas de resolver algo", value: "misterioso" },
+          { icon: "💡", label: "Reflexión profunda, filosofía o inspiración", value: "reflexivo" },
+          { icon: "🎭", label: "Risas, buen humor o drama cotidiano", value: "divertido" }
         ]
       },
       {
         key: "genre",
         title: "¿Qué tipo de género literario prefieres explorar?",
         options: [
-          { icon: "⚔️", label: "Aventura o Fantasía con magia y mundos nuevos", value: "fantasia" },
+          { icon: "⚔️", label: "Aventura o Fantasía con magia y nuevos mundos", value: "fantasia" },
           { icon: "🕵️", label: "Misterio policial, enigmas y suspenso", value: "misterio" },
           { icon: "🤖", label: "Ciencia ficción, futuros extraños y distopías", value: "scifi" },
           { icon: "📜", label: "Historias reales, leyendas o realismo mágico", value: "leyendas" },
-          { icon: "🌱", label: "Vida cotidiana, humor o crecimiento personal", value: "crecimiento" }
+          { icon: "🌱", label: "Vida cotidiana, humor o desarrollo personal", value: "crecimiento" }
         ]
       },
       {
         key: "protagonist",
         title: "¿Quién te gustaría que sea el protagonista?",
         options: [
-          { icon: "🛡️", label: "Un héroe solitario frente a su propio destino", value: "solitario" },
+          { icon: "🛡️", label: "Un héroe solitario contra el mundo o su destino", value: "solitario" },
           { icon: "🤝", label: "Un grupo leal de amigos o una familia unida", value: "amigos" },
           { icon: "🐉", label: "Criaturas míticas, animales o seres fantásticos", value: "criaturas" }
         ]
@@ -753,8 +403,8 @@
         title: "¿Qué extensión prefieres para este momento?",
         options: [
           { icon: "⚡", label: "Corto y al grano (menos de 150 páginas / cuentos)", value: "corto" },
-          { icon: "📖", label: "Longitud media (la medida justa para disfrutar)", value: "medio" },
-          { icon: "📚", label: "Novela extensa o saga para sumergirse por días", value: "largo" }
+          { icon: "📖", label: "Longitud media (la medida ideal para disfrutar)", value: "medio" },
+          { icon: "📚", label: "Novela extensa o saga con un mundo enorme", value: "largo" }
         ]
       }
     ];
@@ -763,6 +413,24 @@
     const userAnswers = {};
     let rankedRecommendations = [];
     let currentRecIndex = 0;
+
+    async function loadCatalog() {
+      try {
+        const response = await fetch('./libros.json');
+        if (!response.ok) throw new Error("No se pudo cargar libros.json");
+        booksCatalog = await response.json();
+        
+        document.getElementById("loadingBox").style.display = "none";
+        document.getElementById("questionTitle").style.display = "block";
+        document.getElementById("progressWrapper").style.display = "block";
+        renderQuestion();
+      } catch (err) {
+        document.getElementById("loadingBox").innerHTML = `
+          <p style="color:#f87171;">⚠️ No se encontró el archivo <code>libros.json</code>.</p>
+          <p style="font-size:0.85rem; margin-top:8px;">Asegúrate de colocar <b>libros.json</b> en la misma carpeta que este <b>index.html</b> en tu repositorio.</p>
+        `;
+      }
+    }
 
     function renderQuestion() {
       const q = surveyQuestions[currentStep];
@@ -799,18 +467,18 @@
     function calculateRecommendations() {
       rankedRecommendations = booksCatalog.map(b => {
         let score = 0;
-        if (b.ages.includes(userAnswers.age)) score += 5;
-        if (b.pace.includes(userAnswers.pace)) score += 3;
-        if (b.vibe.includes(userAnswers.vibe)) score += 3;
+        if (b.ages && b.ages.includes(userAnswers.age)) score += 5;
+        if (b.pace && b.pace.includes(userAnswers.pace)) score += 3;
+        if (b.vibe && b.vibe.includes(userAnswers.vibe)) score += 3;
         if (b.genre === userAnswers.genre) score += 4;
         if (b.protagonist === userAnswers.protagonist) score += 2;
-        if (b.format.includes(userAnswers.format)) score += 2;
+        if (b.format && b.format.includes(userAnswers.format)) score += 2;
 
         return { ...b, matchScore: score };
       });
 
       rankedRecommendations.sort((a, b) => b.matchScore - a.matchScore);
-      rankedRecommendations = rankedRecommendations.slice(0, 10);
+      rankedRecommendations = rankedRecommendations.slice(0, 15);
 
       currentRecIndex = 0;
       document.getElementById("quizBox").style.display = "none";
@@ -823,14 +491,21 @@
     function displayCurrentRecommendation() {
       const book = rankedRecommendations[currentRecIndex];
 
-      document.getElementById("resCategory").textContent = book.category;
+      document.getElementById("resCategory").textContent = book.category || "Literatura Recomendada";
       document.getElementById("resCounter").textContent = `Opción ${currentRecIndex + 1} de ${rankedRecommendations.length}`;
       document.getElementById("resTitle").textContent = book.title;
-      document.getElementById("resAuthor").textContent = `por ${book.author}`;
-      document.getElementById("resPassage").textContent = `"${book.passage}"`;
-      document.getElementById("resReason").textContent = book.reason;
       
-      const querySearch = encodeURIComponent(`${book.title} ${book.author}`);
+      let autorMostrado = book.author || "";
+      if (autorMostrado.includes("Jesús Ramírez") || autorMostrado.includes("Jesús de Jesús")) {
+        autorMostrado = "Robert Pacheco";
+      }
+      document.getElementById("resAuthor").textContent = `por ${autorMostrado}`;
+      
+      document.getElementById("resPassage").textContent = `"${book.passage || 'Una obra indispensable para descubrir nuevas perspectivas.'}"`;
+      document.getElementById("resReason").textContent = book.reason || "Coincide con tus preferencias de género y ritmo de lectura.";
+      
+      let tituloLimpio = book.title.split('/')[0].replace(/\(Ed\..*?\)/g, '').trim();
+      const querySearch = encodeURIComponent(`${tituloLimpio} ${autorMostrado}`);
       document.getElementById("resLink").href = `https://play.google.com/store/search?q=${querySearch}&c=books`;
 
       const btnNext = document.getElementById("btnNextOption");
@@ -860,7 +535,7 @@
       renderQuestion();
     }
 
-    renderQuestion();
+    loadCatalog();
   </script>
 </body>
 </html>
