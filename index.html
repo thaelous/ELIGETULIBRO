@@ -465,9 +465,14 @@
     }
 
     function calculateRecommendations() {
-      rankedRecommendations = booksCatalog.map(b => {
+      // FILTRO ESTRICTO DE EDAD: Si el libro no incluye la edad seleccionada, se descarta por completo
+      const catalogFiltrado = booksCatalog.filter(b => {
+        if (!b.ages) return true;
+        return b.ages.includes(userAnswers.age);
+      });
+
+      rankedRecommendations = catalogFiltrado.map(b => {
         let score = 0;
-        if (b.ages && b.ages.includes(userAnswers.age)) score += 5;
         if (b.pace && b.pace.includes(userAnswers.pace)) score += 3;
         if (b.vibe && b.vibe.includes(userAnswers.vibe)) score += 3;
         if (b.genre === userAnswers.genre) score += 4;
@@ -478,8 +483,12 @@
       });
 
       rankedRecommendations.sort((a, b) => b.matchScore - a.matchScore);
-      // Ampliado a 20 opciones para aprovechar el catálogo grande
       rankedRecommendations = rankedRecommendations.slice(0, 20);
+
+      // Si por alguna razón el filtro estricto deja pocos resultados, respaldamos con todo el catálogo
+      if (rankedRecommendations.length === 0) {
+        rankedRecommendations = booksCatalog.slice(0, 10);
+      }
 
       currentRecIndex = 0;
       document.getElementById("quizBox").style.display = "none";
