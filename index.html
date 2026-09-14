@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu Próxima Lectura | Brújula de Libros</title>
+  <title>Brújula Literaria | Descubre tu próxima lectura</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #f59e0b;
-      --accent-hover: #d97706;
+      --bg-gradient: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+      --card-bg: rgba(30, 41, 59, 0.75);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --accent-warm: #f59e0b;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --border: #334155;
+      --btn-bg: rgba(15, 23, 42, 0.85);
+      --btn-hover: rgba(56, 189, 248, 0.15);
     }
 
     * {
@@ -23,23 +26,26 @@
     }
 
     body {
-      background-color: var(--bg);
+      background: var(--bg-gradient);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 24px 16px;
     }
 
-    .container {
+    .app-card {
       width: 100%;
-      max-width: 600px;
+      max-width: 640px;
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 36px 28px;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 30px var(--accent-glow);
+      position: relative;
     }
 
     .header {
@@ -47,11 +53,20 @@
       margin-bottom: 24px;
     }
 
-    .header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
+    .icon-banner {
+      font-size: 2.2rem;
       margin-bottom: 8px;
-      color: var(--accent);
+      display: inline-block;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
     }
 
     .header p {
@@ -59,458 +74,463 @@
       font-size: 0.95rem;
     }
 
-    .progress-bar-container {
-      width: 100%;
-      height: 6px;
-      background-color: var(--border);
-      border-radius: 999px;
+    .progress-wrapper {
       margin-bottom: 28px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .progress-bar {
+    .progress-fill {
       height: 100%;
-      width: 25%;
-      background: var(--accent);
-      transition: width 0.3s ease;
+      width: 16%;
+      background: linear-gradient(90deg, var(--accent), #818cf8);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+      box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    .question-box h2 {
-      font-size: 1.25rem;
+    .question-title {
+      font-size: 1.3rem;
+      font-weight: 700;
       margin-bottom: 20px;
       text-align: center;
-      font-weight: 600;
+      line-height: 1.4;
     }
 
-    .options-grid {
+    .options-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .btn-option {
-      background: #0f172a;
-      border: 1px solid var(--border);
+    .btn-choice {
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
       color: var(--text);
       padding: 16px 20px;
-      border-radius: 12px;
-      font-size: 1rem;
+      border-radius: 14px;
+      font-size: 0.98rem;
+      font-weight: 500;
       text-align: left;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 14px;
     }
 
-    .btn-option:hover {
+    .btn-choice:hover {
       border-color: var(--accent);
-      background-color: #172554;
+      background: var(--btn-hover);
       transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.15);
     }
 
-    /* Tarjeta de resultado */
-    .result-card {
-      display: none;
+    .btn-choice .opt-icon {
+      font-size: 1.4rem;
+      min-width: 32px;
       text-align: center;
     }
 
-    .badge {
-      display: inline-block;
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--accent);
+    .result-section {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .result-badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .tag-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
       padding: 4px 12px;
       border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .tag-alt {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-warm);
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
     .book-title {
-      font-size: 1.8rem;
+      font-size: 1.85rem;
       font-weight: 800;
-      margin-bottom: 4px;
       color: #fff;
+      line-height: 1.25;
+      margin-bottom: 6px;
     }
 
     .book-author {
+      font-size: 1.1rem;
       color: var(--text-muted);
-      font-size: 1.05rem;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       font-style: italic;
     }
 
-    .quote-box {
-      background: #0f172a;
+    .passage-card {
+      background: rgba(15, 23, 42, 0.9);
       border-left: 4px solid var(--accent);
-      padding: 16px 18px;
-      margin-bottom: 20px;
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 14px 14px 0;
+      padding: 18px 20px;
       text-align: left;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.96rem;
+      line-height: 1.6;
       color: #cbd5e1;
+      margin-bottom: 18px;
     }
 
-    .why-box {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.4;
+    .why-block {
       text-align: left;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
     }
 
-    .btn-action {
-      display: inline-block;
+    .action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
       width: 100%;
       text-decoration: none;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
       color: #0f172a;
       font-weight: 700;
-      padding: 14px 20px;
-      border-radius: 10px;
+      padding: 15px 22px;
+      border-radius: 14px;
       font-size: 1rem;
-      transition: background 0.2s;
-      margin-bottom: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px var(--accent-glow);
     }
 
-    .btn-action:hover {
-      background: var(--accent-hover);
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
     }
 
-    .btn-restart {
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      color: #cbd5e1;
+      font-weight: 600;
+      padding: 13px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-warm);
+      color: var(--accent-warm);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .btn-reset {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
-      text-decoration: underline;
       margin-top: 8px;
+      text-decoration: underline;
     }
 
-    .btn-restart:hover {
-      color: var(--text);
+    .status-msg {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1rem;
+      padding: 40px 0;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <div class="app-card">
     <div class="header">
-      <h1>Brújula Literaria</h1>
-      <p>Descubre tu siguiente historia sin rodeos</p>
+      <span class="icon-banner">🧭</span>
+      <h1>Brújula de Lectura</h1>
+      <p id="subHeader">Cargando biblioteca...</p>
     </div>
 
-    <div class="progress-bar-container" id="progressBarContainer">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-
-    <!-- Contenedor del Cuestionario -->
-    <div id="quizContainer">
-      <div class="question-box">
-        <h2 id="questionText">Cargando...</h2>
-        <div class="options-grid" id="optionsContainer"></div>
+    <div class="progress-wrapper" id="progressWrapper" style="display:none;">
+      <div class="progress-meta">
+        <span id="stepIndicator">Pregunta 1 de 6</span>
+        <span id="stepPercent">16%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
     </div>
 
-    <!-- Contenedor del Resultado -->
-    <div class="result-card" id="resultContainer">
-      <span class="badge" id="resGenre">Recomendación</span>
+    <div id="quizBox">
+      <div id="loadingBox" class="status-msg">Cargando base de datos de libros...</div>
+      <h2 class="question-title" id="questionTitle" style="display:none;"></h2>
+      <div class="options-list" id="optionsList"></div>
+    </div>
+
+    <div class="result-section" id="resultBox">
+      <div class="result-badges">
+        <span class="tag-badge" id="resCategory">Recomendación</span>
+        <span class="tag-badge tag-alt" id="resCounter">Opción 1 de 10</span>
+      </div>
+      
       <h2 class="book-title" id="resTitle">Título del Libro</h2>
       <p class="book-author" id="resAuthor">por Autor</p>
       
-      <div class="quote-box">
+      <div class="passage-card">
         <p id="resPassage">"Pasaje del libro..."</p>
       </div>
 
-      <p class="why-box" id="resReason">Por qué te gustará...</p>
+      <div class="why-block">
+        <strong style="color: #f1f5f9; display:block; margin-bottom:4px;">¿Por qué este libro?</strong>
+        <span id="resReason">Razón de la recomendación.</span>
+      </div>
 
-      <a href="#" target="_blank" class="btn-action" id="resLink">Ver en Google Play Libros</a>
-      <br />
-      <button class="btn-restart" onclick="restartQuiz()">Probar de nuevo</button>
+      <div class="action-group">
+        <a href="#" target="_blank" class="btn-main" id="resLink">
+          <span>📖 Ver en Google Play Libros</span>
+          <span>↗</span>
+        </a>
+        <button class="btn-secondary" id="btnNextOption" onclick="showNextOption()">
+          🔄 No me convence, ver otra opción
+        </button>
+        <button class="btn-reset" onclick="restartQuiz()">Reiniciar cuestionario</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // Catálogo estático local sin costos de API
-    const books = [
-      // 5 a 11 años
-      {
-        id: "inf_1",
-        title: "Cuentos de la selva",
-        author: "Horacio Quiroga",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        genre: "aventura",
-        character: "criaturas",
-        passage: "Los yacarés se despertaron de golpe con un gran ruido en el agua. Era un ruido desconocido que venía del río...",
-        reason: "Relatos rápidos llenos de animales astutos, aventuras salvajes y naturaleza pura.",
-        query: "Cuentos de la selva Horacio Quiroga"
-      },
-      {
-        id: "inf_2",
-        title: "El principito",
-        author: "Antoine de Saint-Exupéry",
-        ages: ["5-11", "12-17"],
-        pace: ["casual", "avido"],
-        genre: "crecimiento",
-        character: "solitario",
-        passage: "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.",
-        reason: "Un viaje inolvidable por mundos pequeños para descubrir el valor de la amistad y la curiosidad.",
-        query: "El principito Antoine de Saint-Exupéry"
-      },
-      {
-        id: "inf_3",
-        title: "Las preguntas de Aldebarán",
-        author: "Jesús Ramírez Haro",
-        ages: ["5-11"],
-        pace: ["principiante", "casual"],
-        genre: "crecimiento",
-        character: "amigos",
-        passage: "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando a que te atrevas a preguntar.",
-        reason: "Ideal para mentes inquietas que nunca se cansan de explorar el porqué de las cosas.",
-        query: "Las preguntas de Aldebaran"
-      },
-      {
-        id: "inf_4",
-        title: "Harry Potter y la piedra filosofal",
-        author: "J.K. Rowling",
-        ages: ["5-11", "12-17"],
-        pace: ["casual", "avido"],
-        genre: "aventura",
-        character: "amigos",
-        passage: "El señor y la señora Dursley, de Privet Drive número 4, estaban orgullosos de decir que eran muy normales, afortunadamente.",
-        reason: "La puerta de entrada ideal a una saga mágica llena de misterio, lealtad y peligros.",
-        query: "Harry Potter y la piedra filosofal"
-      },
+    let booksCatalog = [];
 
-      // 12 a 17 años
-      {
-        id: "juv_1",
-        title: "El libro salvaje",
-        author: "Juan Villoro",
-        ages: ["12-17"],
-        pace: ["casual", "avido"],
-        genre: "misterio",
-        character: "solitario",
-        passage: "Los libros son como espejos: sólo se ve en ellos lo que uno ya lleva dentro. Pero hay libros rebeldes que eligen a su dueño.",
-        reason: "Una aventura en una biblioteca laberíntica donde los libros cobran vida y guardan secretos.",
-        query: "El libro salvaje Juan Villoro"
-      },
-      {
-        id: "juv_2",
-        title: "Relato de un náufrago",
-        author: "Gabriel García Márquez",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        genre: "aventura",
-        character: "solitario",
-        passage: "Mi primera impresión fue la de que estaba absolutamente solo en medio del mar. El sol abrasador y la soledad total.",
-        reason: "Una historia real, directa y trepidante que se lee de un tirón.",
-        query: "Relato de un naufrago Gabriel Garcia Marquez"
-      },
-      {
-        id: "juv_3",
-        title: "101 buenos malos consejos para mi hijo",
-        author: "Jesús Ramírez Haro",
-        ages: ["12-17", "18+"],
-        pace: ["principiante", "casual"],
-        genre: "crecimiento",
-        character: "amigos",
-        passage: "Aprender a tropezar con estilo es casi más útil que evitar las piedras del camino.",
-        reason: "Reflexiones sinceras, humor irreverente y lecciones prácticas para enfrentar la vida sin solemnidades.",
-        query: "101 buenos malos consejos para mi hijo"
-      },
-      {
-        id: "juv_4",
-        title: "Percy Jackson y el ladrón del rayo",
-        author: "Rick Riordan",
-        ages: ["12-17"],
-        pace: ["casual", "avido"],
-        genre: "aventura",
-        character: "criaturas",
-        passage: "Mira, yo no quería ser un mestizo. Si estás leyendo esto porque crees que podrías serlo, cierra el libro ahora mismo.",
-        reason: "Mitología clásica traída a toda velocidad al mundo moderno con humor y acción sin descanso.",
-        query: "Percy Jackson y el ladron del rayo"
-      },
-
-      // 18 años o más
-      {
-        id: "ad_1",
-        title: "Pedro Páramo",
-        author: "Juan Rulfo",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        genre: "leyendas",
-        character: "solitario",
-        passage: "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo. Un pueblo lleno de murmullos y ecos.",
-        reason: "Una cumbre de la literatura mexicana: atmósfera espectral, voces del más allá y poesía pura.",
-        query: "Pedro Paramo Juan Rulfo"
-      },
-      {
-        id: "ad_2",
-        title: "Ficciones",
-        author: "Jorge Luis Borges",
-        ages: ["18+"],
-        pace: ["avido"],
-        genre: "misterio",
-        character: "solitario",
-        passage: "El universo (que otros llaman la Biblioteca) se compone de un número indefinido, y tal vez infinito, de galerías hexagonales...",
-        reason: "Para lectores audaces que disfrutan laberintos mentales, espejos, paradojas y acertijos.",
-        query: "Ficciones Jorge Luis Borges"
-      },
-      {
-        id: "ad_3",
-        title: "La sombra del viento",
-        author: "Carlos Ruiz Zafón",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        genre: "misterio",
-        character: "amigos",
-        passage: "Cada libro, cada tomo que ves, tiene alma. El alma de quien lo escribió y el alma de quienes lo leyeron y vivieron y soñaron con él.",
-        reason: "Intriga gótica, suspenso y secretos literarios en las calles oscuras de Barcelona.",
-        query: "La sombra del viento Carlos Ruiz Zafon"
-      },
-      {
-        id: "ad_4",
-        title: "Las Delicias: Una semilla en tierra yerma",
-        author: "Jesús Ramírez Haro",
-        ages: ["18+"],
-        pace: ["casual", "avido"],
-        genre: "leyendas",
-        character: "amigos",
-        passage: "La tierra tiene memoria propia, y los secretos de una estirpe siempre brotan cuando la sequía aprieta.",
-        reason: "Realismo mágico íntimo y el pulso vibrante de una saga generacional que marca el destino.",
-        query: "Las Delicias Una semilla en tierra yerma"
-      }
-    ];
-
-    // Preguntas del cuestionario
-    const questions = [
+    const surveyQuestions = [
       {
         key: "age",
-        text: "¿Cuál es tu rango de edad?",
+        title: "¿En qué rango de edad te encuentras?",
         options: [
-          { label: "De 5 a 11 años", value: "5-11" },
-          { label: "De 12 a 17 años", value: "12-17" },
-          { label: "18 años o más", value: "18+" }
+          { icon: "🌱", label: "De 5 a 11 años (Primeras lecturas)", value: "5-11" },
+          { icon: "⚡", label: "De 12 a 17 años (Jóvenes)", value: "12-17" },
+          { icon: "☕", label: "18 años o más (Jóvenes y adultos)", value: "18+" }
         ]
       },
       {
         key: "pace",
-        text: "¿Cuál es tu experiencia o ritmo de lectura?",
+        title: "¿Cuál es tu ritmo de lectura habitual?",
         options: [
-          { label: "Apenas empiezo / Me canso rápido", value: "principiante" },
-          { label: "Lector casual (historias ágiles)", value: "casual" },
-          { label: "Devorador de libros (historias complejas)", value: "avido" }
+          { icon: "🐢", label: "Apenas empiezo / Me canso rápido", value: "principiante" },
+          { icon: "🚶", label: "Lector casual (historias ágiles y entretenidas)", value: "casual" },
+          { icon: "🚀", label: "Devorador de libros (tramas densas o complejas)", value: "avido" }
+        ]
+      },
+      {
+        key: "vibe",
+        title: "¿Qué sensación buscas sentir hoy?",
+        options: [
+          { icon: "🔥", label: "Adrenalina, tensión y aventura trepidante", value: "aventurero" },
+          { icon: "🧩", label: "Intriga, secretos y ganas de resolver algo", value: "misterioso" },
+          { icon: "💡", label: "Reflexión profunda, filosofía o inspiración", value: "reflexivo" },
+          { icon: "🎭", label: "Risas, buen humor o drama cotidiano", value: "divertido" }
         ]
       },
       {
         key: "genre",
-        text: "¿Qué tipo de historia te llama la atención hoy?",
+        title: "¿Qué tipo de género literario prefieres explorar?",
         options: [
-          { label: "Aventura, acción y mundos fantásticos", value: "aventura" },
-          { label: "Misterio, enigmas y secretos", value: "misterio" },
-          { label: "Crecimiento, humor y vida cotidiana", value: "crecimiento" },
-          { label: "Leyendas, historia y realismo mágico", value: "leyendas" }
+          { icon: "⚔️", label: "Aventura o Fantasía con magia y nuevos mundos", value: "fantasia" },
+          { icon: "🕵️", label: "Misterio policial, enigmas y suspenso", value: "misterio" },
+          { icon: "🤖", label: "Ciencia ficción, futuros extraños y distopías", value: "scifi" },
+          { icon: "📜", label: "Historias reales, leyendas o realismo mágico", value: "leyendas" },
+          { icon: "🌱", label: "Vida cotidiana, humor o desarrollo personal", value: "crecimiento" }
         ]
       },
       {
-        key: "character",
-        text: "¿A quién te gustaría acompañar como protagonista?",
+        key: "protagonist",
+        title: "¿Quién te gustaría que sea el protagonista?",
         options: [
-          { label: "A un grupo de amigos o compañeros valientes", value: "amigos" },
-          { label: "A un personaje solitario descubriendo su destino", value: "solitario" },
-          { label: "A seres mágicos, criaturas o mitos", value: "criaturas" }
+          { icon: "🛡️", label: "Un héroe solitario contra el mundo o su destino", value: "solitario" },
+          { icon: "🤝", label: "Un grupo leal de amigos o una familia unida", value: "amigos" },
+          { icon: "🐉", label: "Criaturas míticas, animales o seres fantásticos", value: "criaturas" }
+        ]
+      },
+      {
+        key: "format",
+        title: "¿Qué extensión prefieres para este momento?",
+        options: [
+          { icon: "⚡", label: "Corto y al grano (menos de 150 páginas / cuentos)", value: "corto" },
+          { icon: "📖", label: "Longitud media (la medida ideal para disfrutar)", value: "medio" },
+          { icon: "📚", label: "Novela extensa o saga con un mundo enorme", value: "largo" }
         ]
       }
     ];
 
     let currentStep = 0;
     const userAnswers = {};
+    let rankedRecommendations = [];
+    let currentRecIndex = 0;
+
+    // Cargar la base de datos externa de libros
+    async function loadCatalog() {
+      try {
+        const response = await fetch('./libros.json');
+        if (!response.ok) throw new Error("No se pudo cargar libros.json");
+        booksCatalog = await response.json();
+        
+        document.getElementById("loadingBox").style.display = "none";
+        document.getElementById("questionTitle").style.display = "block";
+        document.getElementById("progressWrapper").style.display = "block";
+        document.getElementById("subHeader").textContent = `${booksCatalog.length} obras en catálogo`;
+        renderQuestion();
+      } catch (err) {
+        document.getElementById("loadingBox").innerHTML = `
+          <p style="color:#f87171;">⚠️ No se encontró el archivo <code>libros.json</code>.</p>
+          <p style="font-size:0.85rem; margin-top:8px;">Asegúrate de colocar <b>libros.json</b> en la misma carpeta que este <b>index.html</b> en tu repositorio.</p>
+        `;
+      }
+    }
 
     function renderQuestion() {
-      const q = questions[currentStep];
-      document.getElementById("questionText").textContent = q.text;
-      
-      const progressPercent = ((currentStep + 1) / questions.length) * 100;
-      document.getElementById("progressBar").style.width = progressPercent + "%";
+      const q = surveyQuestions[currentStep];
+      document.getElementById("questionTitle").textContent = q.title;
 
-      const container = document.getElementById("optionsContainer");
-      container.innerHTML = "";
+      const progressPercent = Math.round(((currentStep + 1) / surveyQuestions.length) * 100);
+      document.getElementById("progressFill").style.width = progressPercent + "%";
+      document.getElementById("stepIndicator").textContent = `Pregunta ${currentStep + 1} de ${surveyQuestions.length}`;
+      document.getElementById("stepPercent").textContent = progressPercent + "%";
+
+      const list = document.getElementById("optionsList");
+      list.innerHTML = "";
 
       q.options.forEach(opt => {
         const btn = document.createElement("button");
-        btn.className = "btn-option";
-        btn.innerHTML = `<span>${opt.label}</span> <span>→</span>`;
+        btn.className = "btn-choice";
+        btn.innerHTML = `<span class="opt-icon">${opt.icon}</span> <span>${opt.label}</span>`;
         btn.onclick = () => selectOption(q.key, opt.value);
-        container.appendChild(btn);
+        list.appendChild(btn);
       });
     }
 
-    function selectOption(key, value) {
-      userAnswers[key] = value;
+    function selectOption(key, val) {
+      userAnswers[key] = val;
       currentStep++;
 
-      if (currentStep < questions.length) {
+      if (currentStep < surveyQuestions.length) {
         renderQuestion();
       } else {
-        showResult();
+        calculateRecommendations();
       }
     }
 
-    function showResult() {
-      document.getElementById("quizContainer").style.display = "none";
-      document.getElementById("progressBarContainer").style.display = "none";
-      document.getElementById("resultContainer").style.display = "block";
+    function calculateRecommendations() {
+      rankedRecommendations = booksCatalog.map(b => {
+        let score = 0;
+        if (b.ages && b.ages.includes(userAnswers.age)) score += 5;
+        if (b.pace && b.pace.includes(userAnswers.pace)) score += 3;
+        if (b.vibe && b.vibe.includes(userAnswers.vibe)) score += 3;
+        if (b.genre === userAnswers.genre) score += 4;
+        if (b.protagonist === userAnswers.protagonist) score += 2;
+        if (b.format && b.format.includes(userAnswers.format)) score += 2;
 
-      // Filtro con sistema de puntuación para asegurar la coincidencia más cercana
-      let matches = books.filter(b => b.ages.includes(userAnswers.age));
-      
-      if (matches.length === 0) {
-        matches = books;
-      }
-
-      // Rankeo de coincidencias
-      matches.sort((a, b) => {
-        let scoreA = 0;
-        let scoreB = 0;
-
-        if (a.pace.includes(userAnswers.pace)) scoreA += 2;
-        if (b.pace.includes(userAnswers.pace)) scoreB += 2;
-
-        if (a.genre === userAnswers.genre) scoreA += 3;
-        if (b.genre === userAnswers.genre) scoreB += 3;
-
-        if (a.character === userAnswers.character) scoreA += 1;
-        if (b.character === userAnswers.character) scoreB += 1;
-
-        return scoreB - scoreA;
+        return { ...b, matchScore: score };
       });
 
-      const chosen = matches[0];
+      rankedRecommendations.sort((a, b) => b.matchScore - a.matchScore);
+      rankedRecommendations = rankedRecommendations.slice(0, 15);
 
-      document.getElementById("resTitle").textContent = chosen.title;
-      document.getElementById("resAuthor").textContent = `por ${chosen.author}`;
-      document.getElementById("resPassage").textContent = `"${chosen.passage}"`;
-      document.getElementById("resReason").textContent = chosen.reason;
-      document.getElementById("resGenre").textContent = chosen.genre.toUpperCase();
-      document.getElementById("resLink").href = `https://play.google.com/store/search?q=${encodeURIComponent(chosen.query)}&c=books`;
+      currentRecIndex = 0;
+      document.getElementById("quizBox").style.display = "none";
+      document.getElementById("progressWrapper").style.display = "none";
+      document.getElementById("resultBox").style.display = "block";
+
+      displayCurrentRecommendation();
+    }
+
+    function displayCurrentRecommendation() {
+      const book = rankedRecommendations[currentRecIndex];
+
+      document.getElementById("resCategory").textContent = book.category || "Literatura Recomendada";
+      document.getElementById("resCounter").textContent = `Opción ${currentRecIndex + 1} de ${rankedRecommendations.length}`;
+      document.getElementById("resTitle").textContent = book.title;
+      document.getElementById("resAuthor").textContent = `por ${book.author}`;
+      document.getElementById("resPassage").textContent = `"${book.passage || 'Una obra indispensable para descubrir nuevas perspectivas.'}"`;
+      document.getElementById("resReason").textContent = book.reason || "Coincide con tus preferencias de género y ritmo de lectura.";
+      
+      const querySearch = encodeURIComponent(`${book.title} ${book.author}`);
+      document.getElementById("resLink").href = `https://play.google.com/store/search?q=${querySearch}&c=books`;
+
+      const btnNext = document.getElementById("btnNextOption");
+      if (currentRecIndex >= rankedRecommendations.length - 1) {
+        btnNext.textContent = "🔄 Volver a la primera recomendación";
+      } else {
+        btnNext.textContent = "🔄 No me convence, ver otra opción";
+      }
+    }
+
+    function showNextOption() {
+      currentRecIndex = (currentRecIndex + 1) % rankedRecommendations.length;
+      displayCurrentRecommendation();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function restartQuiz() {
       currentStep = 0;
+      currentRecIndex = 0;
       for (let k in userAnswers) delete userAnswers[k];
-      document.getElementById("quizContainer").style.display = "block";
-      document.getElementById("progressBarContainer").style.display = "block";
-      document.getElementById("resultContainer").style.display = "none";
+      rankedRecommendations = [];
+
+      document.getElementById("quizBox").style.display = "block";
+      document.getElementById("progressWrapper").style.display = "block";
+      document.getElementById("resultBox").style.display = "none";
+
       renderQuestion();
     }
 
-    // Iniciar
-    renderQuestion();
+    loadCatalog();
   </script>
 </body>
 </html>
