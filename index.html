@@ -281,13 +281,6 @@
       margin-top: 8px;
       text-decoration: underline;
     }
-
-    .status-msg {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 1rem;
-      padding: 40px 0;
-    }
   </style>
 </head>
 <body>
@@ -299,7 +292,7 @@
       <p>por Robert Pacheco</p>
     </div>
 
-    <div class="progress-wrapper" id="progressWrapper" style="display:none;">
+    <div class="progress-wrapper" id="progressWrapper">
       <div class="progress-meta">
         <span id="stepIndicator">Pregunta 1 de 6</span>
         <span id="stepPercent">16%</span>
@@ -310,8 +303,7 @@
     </div>
 
     <div id="quizBox">
-      <div id="loadingBox" class="status-msg">Cargando base de datos de libros...</div>
-      <h2 class="question-title" id="questionTitle" style="display:none;"></h2>
+      <h2 class="question-title" id="questionTitle"></h2>
       <div class="options-list" id="optionsList"></div>
     </div>
 
@@ -347,7 +339,129 @@
   </div>
 
   <script>
-    let booksCatalog = [];
+    // Catálogo maestro integrado de 100 obras reales y clasificadas estrictamente por edad
+    const booksCatalog = [
+      // --- INFANTILES Y JUVENILES (5-11 y 12-17) ---
+      { id: "b_01", title: "Cuentos de la selva", author: "Horacio Quiroga", ages: ["5-11", "12-17"], pace: ["principiante", "casual"], vibe: ["aventurero"], genre: "aventura", protagonist: "criaturas", format: ["corto"], passage: "Los yacarés se despertaron de golpe con un gran ruido en el agua...", reason: "Relatos ágiles llenos de naturaleza y animales ingeniosos.", category: "Clásico Latinoamericano" },
+      { id: "b_02", title: "El principito", author: "Antoine de Saint-Exupéry", ages: ["5-11", "12-17"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "Sólo con el corazón se puede ver bien; lo esencial es invisible para los ojos.", reason: "Una joya poética universal sobre la amistad.", category: "Clásico Universal" },
+      { id: "b_03", title: "Las preguntas de Aldebarán", author: "Robert Pacheco", ages: ["5-11", "12-17"], pace: ["principiante", "casual"], vibe: ["reflexivo", "divertido"], genre: "crecimiento", protagonist: "amigos", format: ["corto"], passage: "Cuando miras hacia arriba, no solo hay estrellas: hay respuestas esperando.", reason: "Ideal para mentes inquietas que buscan respuestas a las grandes dudas.", category: "Educativo e Inspirador" },
+      { id: "b_04", title: "Harry Potter y la piedra filosofal", author: "J.K. Rowling", ages: ["5-11", "12-17"], pace: ["casual", "avido"], vibe: ["aventurero", "misterioso"], genre: "fantasia", protagonist: "amigos", format: ["medio", "largo"], passage: "El señor y la señora Dursley estaban orgullosos de ser normales...", reason: "La entrada definitiva a un universo de magia.", category: "Pop & Fantasía" },
+      { id: "b_05", title: "Charlie y la fábrica de chocolate", author: "Roald Dahl", ages: ["5-11", "12-17"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "fantasia", protagonist: "solitario", format: ["corto", "medio"], passage: "¡El billete dorado brillaba con una luz hermosa!", reason: "Humor y dulces fantásticos para disfrutar sin parar.", category: "Clásico Infantil" },
+      { id: "b_06", title: "Percy Jackson y el ladrón del rayo", author: "Rick Riordan", ages: ["12-17"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "fantasia", protagonist: "amigos", format: ["medio", "largo"], passage: "Mira, yo no quería ser un mestizo...", reason: "Mitología griega adaptada a un ritmo vertiginoso.", category: "Pop & Aventura" },
+      { id: "b_07", title: "Los juegos del hambre", author: "Suzanne Collins", ages: ["12-17"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "scifi", protagonist: "solitario", format: ["medio", "largo"], passage: "—¡Me ofrezco voluntaria como tributo!", reason: "Suspenso constante y tensión desde el primer capítulo.", category: "Distopía Pop" },
+      { id: "b_08", title: "101 buenos malos consejos para mi hijo", author: "Robert Pacheco", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["divertido", "reflexivo"], genre: "crecimiento", protagonist: "amigos", format: ["corto", "medio"], passage: "Aprender a tropezar con estilo es mucho más valioso.", reason: "Sentido del humor mordaz y consejos prácticos.", category: "Humor y Crecimiento" },
+      { id: "b_09", title: "El libro salvaje", author: "Juan Villoro", ages: ["12-17"], pace: ["casual", "avido"], vibe: ["misterioso", "aventurero"], genre: "aventura", protagonist: "solitario", format: ["medio"], passage: "Los libros son como espejos: sólo se ve en ellos lo que uno ya lleva dentro.", reason: "Una biblioteca laberíntica con misterios familiares.", category: "Literatura Mexicana" },
+      { id: "b_10", title: "La peor señora del mundo", author: "Francisco Hinojosa", ages: ["5-11"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "crecimiento", protagonist: "amigos", format: ["corto"], passage: "En el norte de Turambul había una señora que era la peor...", reason: "Demuestra que el ingenio vence a la tiranía.", category: "Literatura Mexicana" },
+      { id: "b_11", title: "Momo", author: "Michael Ende", ages: ["5-11", "12-17"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "fantasia", protagonist: "solitario", format: ["medio"], passage: "El tiempo es vida. Y la vida reside en el corazón.", reason: "Una niña valiente que se enfrenta a quienes roban el tiempo.", category: "Clásico Universal" },
+      { id: "b_12", title: "Matilda", author: "Roald Dahl", ages: ["5-11", "12-17"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Los libros la transportaban a nuevos mundos.", reason: "Una niña brillante amante de los libros.", category: "Clásico Infantil" },
+      { id: "b_13", title: "El hobbit", author: "J.R.R. Tolkien", ages: ["12-17"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "fantasia", protagonist: "solitario", format: ["medio", "largo"], passage: "En un agujero en el suelo vivía un hobbit.", reason: "El viaje iniciático por excelencia con dragones y anillos.", category: "Fantasía Épica" },
+      { id: "b_14", title: "Las batallas en el desierto", author: "José Emilio Pacheco", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "Me enamoré de Mariana sabiendo que era un amor imposible.", reason: "La nostalgia del México de mediados del siglo XX.", category: "Clásico Mexicano" },
+      { id: "b_15", title: "El caballero de la armadura oxidada", author: "Robert Fisher", ages: ["12-17", "18+"], pace: ["principiante"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "El caballero pensaba que era bueno, generoso y amoroso.", reason: "Relato sobre desprenderse de las corazas emocionales.", category: "Crecimiento y Reflexión" },
+
+      // --- OSCAR WILDE (12-17 y 18+) ---
+      { id: "b_16", title: "El retrato de Dorian Gray", author: "Oscar Wilde", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["misterioso", "reflexivo"], genre: "misterio", protagonist: "solitario", format: ["medio"], passage: "La única forma de librarse de la tentación es caer en ella.", reason: "Reflexión profunda sobre la belleza y la vanidad.", category: "Clásico Universal" },
+      { id: "b_17", title: "El fantasma de Canterville", author: "Oscar Wilde", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "misterio", protagonist: "amigos", format: ["corto"], passage: "Cuando los Otis compraron Canterville Chase...", reason: "Divertida sátira sobre un viejo fantasma.", category: "Clásico Universal" },
+      { id: "b_18", title: "El príncipe feliz y otros cuentos", author: "Oscar Wilde", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "—¿Quién eres tú? —dijo—. Soy el Príncipe Feliz.", reason: "Cuentos tiernos y conmovedores llenos de altruismo.", category: "Clásico Universal" },
+      { id: "b_19", title: "El crimen de Lord Arthur Savile", author: "Oscar Wilde", ages: ["18+"], pace: ["casual"], vibe: ["divertido", "misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto"], passage: "Lord Arthur Savile experimentó un sobresalto espantoso.", reason: "Ironía fina y humor negro victoriano.", category: "Clásico Universal" },
+
+      // --- STEPHEN KING (Estrictamente Adultos 18+) ---
+      { id: "b_20", title: "Carrie", author: "Stephen King", ages: ["18+"], pace: ["casual", "avido"], vibe: ["oscuro"], genre: "misterio", protagonist: "solitario", format: ["medio"], passage: "Las chicas con poderes telequinéticos no suelen tener una adolescencia sencilla.", reason: "La obra que lanzó a la fama al maestro del terror.", category: "Terror & Suspenso" },
+      { id: "b_21", title: "El resplandor", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["misterioso", "oscuro"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "El hotel Overlook guardaba secretos antiguos.", reason: "Aislamiento, locura y horrores en la nieve.", category: "Terror & Suspenso" },
+      { id: "b_22", title: "It (Eso)", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["oscuro"], genre: "misterio", protagonist: "amigos", format: ["largo"], passage: "Bienvenido a Derry. Aquí los sueños infantiles a veces aterrorizan.", reason: "Monumental historia sobre la amistad y los miedos profundos.", category: "Terror & Suspenso" },
+      { id: "b_23", title: "Misery", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["misterioso", "oscuro"], genre: "misterio", protagonist: "solitario", format: ["medio"], passage: "El coche estaba destrozado y la mujer era su mayor admiradora.", reason: "Thriller claustrofóbico sobre la obsesión creativa.", category: "Terror & Suspenso" },
+      { id: "b_24", title: "Apocalipsis", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["oscuro"], genre: "scifi", protagonist: "amigos", format: ["largo"], passage: "El virus se extendió con la velocidad del fuego en verano.", reason: "Una de las cumbres de la supervivencia postapocalíptica.", category: "Terror & Suspenso" },
+      { id: "b_25", title: "Cementerio de animales", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["oscuro"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "A veces, estar muerto es mejor.", reason: "Exploración oscura del dolor y los límites de la muerte.", category: "Terror & Suspenso" },
+      { id: "b_26", title: "El visitante", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "Las huellas dactilares no dejaban lugar a dudas, pero el sospechoso estaba en dos sitios a la vez.", reason: "Suspenso policial con tintes sobrenaturales.", category: "Terror & Suspenso" },
+      { id: "b_27", title: "Doctor Sueño", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "Dan Torrance llevaba décadas arrastrando los fantasmas de Overlook.", reason: "Secuela madura y atrapante sobre el poder del resplandor.", category: "Terror & Suspenso" },
+      { id: "b_28", title: "Cujo", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["oscuro"], genre: "misterio", protagonist: "solitario", format: ["medio"], passage: "El calor del verano en Castle Rock parecía derretir las esperanzas.", reason: "Tensión extrema en un vehículo averiado bajo el sol.", category: "Terror & Suspenso" },
+      { id: "b_29", title: "La milla verde", author: "Stephen King", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["largo"], passage: "Estábamos en el bloque E de la prisión de Cold Mountain.", reason: "Emoción pura, milagros y drama carcelario inolvidable.", category: "Terror & Suspenso" },
+
+      // --- FRANZ KAFKA (Estrictamente Adultos 18+) ---
+      { id: "b_30", title: "La metamorfosis", author: "Franz Kafka", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo", "misterioso"], genre: "scifi", protagonist: "solitario", format: ["corto"], passage: "Al despertar Gregorio Samsa una mañana, se encontró transformado en insecto.", reason: "Metáfora imborrable sobre el aislamiento y la familia.", category: "Clásico Universal" },
+      { id: "b_31", title: "El proceso", author: "Franz Kafka", ages: ["18+"], pace: ["avido"], vibe: ["misterioso", "reflexivo"], genre: "misterio", protagonist: "solitario", format: ["medio"], passage: "Alguien debió de haber calumniado a Josef K., pues fue detenido.", reason: "El laberinto kafkiano sobre la burocracia y la culpa.", category: "Clásico Universal" },
+      { id: "b_32", title: "El castillo", author: "Franz Kafka", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["largo"], passage: "Era ya tarde cuando K. llegó al pueblo. La nieve lo cubría todo.", reason: "La lucha inalcanzable de un agrimensor contra un sistema.", category: "Clásico Universal" },
+      { id: "b_33", title: "Carta al padre", author: "Franz Kafka", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "Querido padre: Me preguntaste hace poco por qué afirmaba tenerte miedo.", reason: "Intenso desgarrón psicológico y autobiográfico.", category: "Clásico Universal" },
+
+      // --- DAN BROWN (Estrictamente Adultos 18+) ---
+      { id: "b_34", title: "El código Da Vinci", author: "Dan Brown", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso", "aventurero"], genre: "misterio", protagonist: "amigos", format: ["medio", "largo"], passage: "El museo del Louvre era tan silencioso a medianoche...", reason: "Thriller vertiginoso repleto de criptografía y arte.", category: "Suspenso Internacional" },
+      { id: "b_35", title: "Ángeles y demonios", author: "Dan Brown", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso", "aventurero"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "La ciencia y la religión nunca han estado tan cerca de destruirse.", reason: "Carrera contrarreloj en el Vaticano con Robert Langdon.", category: "Suspenso Internacional" },
+      { id: "b_36", title: "Inferno", author: "Dan Brown", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "Los lugares más oscuros del infierno están reservados para la neutralidad.", reason: "Simbolismo dantesco y amenaza biológica en Florencia.", category: "Suspenso Internacional" },
+      { id: "b_37", title: "Origen", author: "Dan Brown", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "scifi", protagonist: "amigos", format: ["largo"], passage: "De dónde venimos y a dónde vamos son las dos grandes incógnitas.", reason: "Intriga tecnológica y científica por España.", category: "Suspenso Internacional" },
+      { id: "b_38", title: "La conspiración", author: "Dan Brown", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "Un satélite de la NASA descubrió un extraño objeto en el Ártico.", reason: "Suspenso político y científico de alto voltaje.", category: "Suspenso Internacional" },
+
+      // --- MILAN KUNDERA (Estrictamente Adultos 18+) ---
+      { id: "b_39", title: "La insoportable levedad del ser", author: "Milan Kundera", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "La pesadez es sinónimo de la vida real y más intensa.", reason: "Meditación profunda sobre el amor, el destino y el azar.", category: "Clásico Contemporáneo" },
+      { id: "b_40", title: "La broma", author: "Milan Kundera", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Una broma estúpida en una postal puede destruir una existencia.", reason: "El precio de una ocurrencia juvenil en tiempos de intolerancia.", category: "Clásico Contemporáneo" },
+      { id: "b_41", title: "La inmortalidad", author: "Milan Kundera", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Las ideas nos sobreviven y caminan por el mundo.", reason: "Reflexión filosófica brillante sobre la memoria y el ego.", category: "Clásico Contemporáneo" },
+      { id: "b_42", title: "La ignorancia", author: "Milan Kundera", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "El regreso a la patria está lleno de silencios inesperados.", reason: "La nostalgia y el desarraigo tratados con maestría.", category: "Clásico Contemporáneo" },
+
+      // --- CLÁSICOS LATINOAMERICANOS Y MEXICANOS (18+) ---
+      { id: "b_43", title: "Pedro Páramo", author: "Juan Rulfo", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "leyendas", protagonist: "solitario", format: ["corto"], passage: "Vine a Comala porque me dijeron que acá vivía mi padre.", reason: "Obra cumbre mexicana: vivos y muertos en un pueblo de ánimas.", category: "Clásico Mexicano" },
+      { id: "b_44", title: "Cien años de soledad", author: "Gabriel García Márquez", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo", "aventurero"], genre: "leyendas", protagonist: "amigos", format: ["largo"], passage: "Muchos años después, frente al pelotón de fusilamiento...", reason: "La saga definitiva de Macondo y el realismo mágico.", category: "Clásico Latinoamericano" },
+      { id: "b_45", title: "Ficciones", author: "Jorge Luis Borges", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo", "misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto", "medio"], passage: "El universo se compone de galerías hexagonales infinitas.", reason: "Relatos de precisión sobre espejos, infinitos y laberintos.", category: "Literatura Latinoamericana" },
+      { id: "b_46", title: "Rayuela", author: "Julio Cortázar", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["largo"], passage: "¿Encontraría a la Maga?", reason: "Juego vanguardista de múltiples lecturas entre París y Buenos Aires.", category: "Literatura Latinoamericana" },
+      { id: "b_47", title: "Aura", author: "Carlos Fuentes", ages: ["18+"], pace: ["principiante", "casual"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto"], passage: "Lees ese anuncio: una oferta de esa naturaleza no se hace todos los días.", reason: "Sumerge al lector en un rito de sombras en segunda persona.", category: "Literatura Mexicana" },
+      { id: "b_48", title: "Crónica de una muerte anunciada", author: "Gabriel García Márquez", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "amigos", format: ["corto"], passage: "El día en que lo iban a matar, Santiago Nasar se levantó a las 5:30.", reason: "Un crimen anunciado en un pueblo donde el destino está sellado.", category: "Clásico Latinoamericano" },
+      { id: "b_49", title: "El llano en llamas", author: "Juan Rulfo", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["corto"], passage: "Nos han dado la tierra.", reason: "Cuentos sobre el despojo y la resistencia en el campo.", category: "Clásico Mexicano" },
+      { id: "b_50", title: "El Aleph", author: "Jorge Luis Borges", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo", "misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto"], passage: "En ese instante gigantesco, he visto millones de actos...", reason: "Cuentos metafísicos que exploran la eternidad.", category: "Literatura Latinoamericana" },
+
+      // --- RELLENO INTELIGENTE HASTA 100 LIBROS (Con autores y edades correctas) ---
+      { id: "b_51", title: "El amor en los tiempos del cólera", author: "Gabriel García Márquez", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["largo"], passage: "Le bastó con dar una mirada para comprender que nadie volvería a tener jamás un amor semejante.", reason: "Perseverancia amorosa de más de cincuenta años.", category: "Clásico Latinoamericano" },
+      { id: "b_52", title: "La tregua", author: "Mario Benedetti", ages: ["18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Ella me daba la mano y no hacía falta más.", reason: "Conmovedor relato sobre la ternura cotidiana.", category: "Literatura Latinoamericana" },
+      { id: "b_53", title: "El túnel", author: "Ernesto Sabato", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto"], passage: "Bastará decir que soy Juan Pablo Castel, el pintor que mató a María Iribarne.", reason: "Exploración punzante de la soledad y la obsesión.", category: "Clásico Latinoamericano" },
+      { id: "b_54", title: "Ensayo sobre la ceguera", author: "José Saramago", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "amigos", format: ["largo"], passage: "Creo que no nos quedamos ciegos, creo que estamos ciegos.", reason: "Parábola contundente sobre los límites de la supervivencia.", category: "Clásico Contemporáneo" },
+      { id: "b_55", title: "La sombra del viento", author: "Carlos Ruiz Zafón", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "amigos", format: ["largo"], passage: "Cada libro tiene alma. El alma de quien lo escribió y de quienes lo leyeron.", reason: "Suspenso cautivador en una Barcelona de posguerra.", category: "Contemporáneo Popular" },
+      { id: "b_56", title: "1984", author: "George Orwell", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "solitario", format: ["medio"], passage: "El Gran Hermano te vigila.", reason: "La distopía más influyente sobre el control totalitario.", category: "Clásico Universal" },
+      { id: "b_57", title: "Rebelión en la granja", author: "George Orwell", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "criaturas", format: ["corto"], passage: "Todos los animales son iguales, pero algunos animales son más iguales que otros.", reason: "Fábula satírica mordaz sobre la corrupción política.", category: "Clásico Universal" },
+      { id: "b_58", title: "Fahrenheit 451", author: "Ray Bradbury", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "solitario", format: ["medio"], passage: "Era un placer quemar.", reason: "Visión profética sobre la importancia de la lectura.", category: "Clásico Ciencia Ficción" },
+      { id: "b_59", title: "Crimen y castigo", author: "Fiódor Dostoyevski", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo", "misterioso"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "¿Acaso soy un piojo como todos o soy un hombre?", reason: "Anatomía psicológica profunda de la culpa.", category: "Clásico Universal" },
+      { id: "b_60", title: "Un mundo feliz", author: "Aldous Huxley", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "solitario", format: ["medio"], passage: "La felicidad real parece bastante fea en comparación con la miseria.", reason: "Sociedad anestesiada por el placer superficial.", category: "Ciencia Ficción Clásica" },
+      { id: "b_61", title: "Dune", author: "Frank Herbert", ages: ["18+"], pace: ["avido"], vibe: ["aventurero"], genre: "scifi", protagonist: "solitario", format: ["largo"], passage: "No debo tener miedo. El miedo es el asesino de la mente.", reason: "La cumbre de la ciencia ficción moderna.", category: "Ciencia Ficción Clásica" },
+      { id: "b_62", title: "La casa de los espíritus", author: "Isabel Allende", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo", "aventurero"], genre: "leyendas", protagonist: "amigos", format: ["largo"], passage: "Barrabás llegó a la familia por vía marítima.", reason: "Saga familiar de pasiones y fantasmas.", category: "Realismo Mágico" },
+      { id: "b_63", title: "Como agua para chocolate", author: "Laura Esquivel", ages: ["18+"], pace: ["principiante", "casual"], vibe: ["divertido", "reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["medio"], passage: "Dicen que Tita era tan sensible que desde el vientre lloraba.", reason: "Recetas mexicanas y realismo mágico en la cocina.", category: "Literatura Mexicana" },
+      { id: "b_64", title: "La muerte de Artemio Cruz", author: "Carlos Fuentes", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["largo"], passage: "Yo no sé si ellos me miran o si yo los invento en esta agonía.", reason: "Balance despiadado del poder y la Revolución Mexicana.", category: "Clásico Mexicano" },
+      { id: "b_65", title: "Los recuerdos del porvenir", author: "Elena Garro", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo", "misterioso"], genre: "leyendas", protagonist: "amigos", format: ["medio"], passage: "Aquí estoy, sentado sobre esta piedra aparente.", reason: "Piedra angular del realismo mágico mexicano.", category: "Literatura Mexicana" },
+      { id: "b_66", title: "Confabulario", author: "Juan José Arreola", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "El rinoceronte se detiene. Alza la cabeza.", reason: "Prosa precisa e ironía deslumbrante.", category: "Literatura Mexicana" },
+      { id: "b_67", title: "El guardián entre el centeno", author: "J.D. Salinger", ages: ["12-17", "18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Si de verdad les interesa lo que voy a contarles...", reason: "La voz definitiva de la rebeldía adolescente.", category: "Clásico Universal" },
+      { id: "b_68", title: "La hojarasca", author: "Gabriel García Márquez", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "amigos", format: ["medio"], passage: "Por primera vez he visto un cadáver.", reason: "Novela que inauguró el universo de Macondo.", category: "Realismo Mágico" },
+      { id: "b_69", title: "Relato de un náufrago", author: "Gabriel García Márquez", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["aventurero"], genre: "aventura", protagonist: "solitario", format: ["corto"], passage: "Mi primera impresión fue la de que estaba absolutamente solo.", reason: "Crónica periodística apasionante de supervivencia.", category: "Clásico Latinoamericano" },
+      { id: "b_70", title: "Sobre héroes y tumbas", author: "Ernesto Sabato", ages: ["18+"], pace: ["avido"], vibe: ["misterioso", "reflexivo"], genre: "misterio", protagonist: "solitario", format: ["largo"], passage: "Buenos Aires era una ciudad misteriosa.", reason: "Contiene el legendario Informe sobre ciegos.", category: "Clásico Latinoamericano" },
+      { id: "b_71", title: "La fiesta del Chivo", author: "Mario Vargas Llosa", ages: ["18+"], pace: ["avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "amigos", format: ["largo"], passage: "El país vivía pendiente de la voluntad de un solo hombre.", reason: "Tensión política en la dictadura de Trujillo.", category: "Clásico Latinoamericano" },
+      { id: "b_72", title: "Bestiario", author: "Julio Cortázar", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "misterio", protagonist: "solitario", format: ["corto"], passage: "El tigre andaba por el comedor, así que almorzamos en la galería.", reason: "Cuentos donde lo cotidiano quiebra hacia lo fantástico.", category: "Literatura Latinoamericana" },
+      { id: "b_73", title: "El coronel no tiene quien le escriba", author: "Gabriel García Márquez", ages: ["18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["corto"], passage: "El coronel destapó el tarro de café y comprobó que no había más que una cucharadita.", reason: "Magistral relato sobre la dignidad y la espera.", category: "Clásico Latinoamericano" },
+      { id: "b_74", title: "La ciudad y los perros", author: "Mario Vargas Llosa", ages: ["18+"], pace: ["avido"], vibe: ["oscuro"], genre: "crecimiento", protagonist: "amigos", format: ["largo"], passage: "La calle parecía discurrir lentamente bajo la llovizna.", reason: "Brutal retrato de disciplina y violencia juvenil.", category: "Clásico Latinoamericano" },
+      { id: "b_75", title: "Los cachorros", author: "Mario Vargas Llosa", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "amigos", format: ["corto"], passage: "Todavía tenían calzoncillos cortos ese día en que Cuéllar entró al colegio.", reason: "Noveleta ágil sobre el destino y la castración simbólica.", category: "Clásico Latinoamericano" },
+      { id: "b_76", title: "De amor y de sombra", author: "Isabel Allende", ages: ["18+"], pace: ["casual", "avido"], vibe: ["misterioso"], genre: "leyendas", protagonist: "amigos", format: ["largo"], passage: "Hay amores que se incrustan en el alma sin pedir permiso.", reason: "Romance y denuncia en tiempos oscuros.", category: "Realismo Mágico" },
+      { id: "b_77", title: "Eva Luna", author: "Isabel Allende", ages: ["18+"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "leyendas", protagonist: "solitario", format: ["largo"], passage: "Nací en una época de tumba y miseria.", reason: "El poder sanador de contar historias y la libertad.", category: "Realismo Mágico" },
+      { id: "b_78", title: "Gringo viejo", author: "Carlos Fuentes", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["medio"], passage: "Pasó la frontera a pie, un libro de poesía en el bolsillo.", reason: "Un escritor extranjero buscando su muerte en la Revolución.", category: "Literatura Mexicana" },
+      { id: "b_79", title: "La región más transparente", author: "Carlos Fuentes", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "amigos", format: ["largo"], passage: "México se extiende como un monstruo de piedra y cristal.", reason: "Retrato monumental de la Ciudad de México moderna.", category: "Clásico Mexicano" },
+      { id: "b_80", title: "Varia invención", author: "Juan José Arreola", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["corto"], passage: "El guardagujas es un anciano venerable.", reason: "Fantasía ligera y profunda sobre la burocracia y los trenes.", category: "Literatura Mexicana" },
+      { id: "b_81", title: "La feria", author: "Juan José Arreola", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "amigos", format: ["medio"], passage: "Zapotlán el Grande es un pueblo de artesanos y agricultores.", reason: "Voces corales que cantan la vida de un pueblo mexicano.", category: "Literatura Mexicana" },
+      { id: "b_82", title: "Los pasos perdidos", author: "Alejo Carpentier", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "solitario", format: ["largo"], passage: "El viaje hacia las fuentes del Orinoco es un retorno al origen.", reason: "Viaje filosófico por la música, el tiempo y la selva virgen.", category: "Clásico Latinoamericano" },
+      { id: "b_83", title: "El reino de este mundo", author: "Alejo Carpentier", ages: ["18+"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "leyendas", protagonist: "solitario", format: ["corto"], passage: "Se hablaba de prodigios en Cabo Haitiano.", reason: "Bautizo literario de lo real maravilloso americano.", category: "Clásico Latinoamericano" },
+      { id: "b_84", title: "Tristana", author: "Benito Pérez Galdós", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "Madrid ostentaba en aquellos días una fisonomía singular.", reason: "Lúcida novela sobre la independencia femenina en España.", category: "Clásico Universal" },
+      { id: "b_85", title: "La Regenta", author: "Leopoldo Alas Clarín", ages: ["18+"], pace: ["avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["largo"], passage: "La heroica ciudad dormía la siesta.", reason: "Obra maestra absoluta de la novela psicológica española.", category: "Clásico Universal" },
+      { id: "b_86", title: "Los intereses creados", author: "Jacinto Benavente", ages: ["12-17", "18+"], pace: ["casual"], vibe: ["divertido"], genre: "crecimiento", protagonist: "amigos", format: ["corto"], passage: "¡Señores y señores, el gran teatro del mundo abre sus puertas!", reason: "Comedia ingeniosa sobre la picardía y la hipocresía social.", category: "Clásico Universal" },
+      { id: "b_87", title: "Marianela", author: "Benito Pérez Galdós", ages: ["12-17", "18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "amigos", format: ["medio"], passage: "Las campanas de Aldcor tocaban a oración.", reason: "Una conmovedora historia sobre la belleza interior y el amor.", category: "Clásico Universal" },
+      { id: "b_88", title: "El coloquio de los perros", author: "Miguel de Cervantes", ages: ["18+"], pace: ["casual"], vibe: ["reflexivo"], genre: "leyendas", protagonist: "criaturas", format: ["corto"], passage: "Llegado habíamos a Valladolid, y en un hospital...", reason: "Sabia y picaresca charla nocturna entre dos canes parlantes.", category: "Clásico Universal" },
+      { id: "b_89", title: "Rinconete y Cortadillo", author: "Miguel de Cervantes", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["divertido"], genre: "crecimiento", protagonist: "amigos", format: ["corto"], passage: "En la venta de El Molinillo, que está en los puertos de Toledo...", reason: "Picaresca ágil y divertida en el bajo mundo andaluz.", category: "Clásico Universal" },
+      { id: "b_90", title: "La gitanilla", author: "Miguel de Cervantes", ages: ["12-17", "18+"], pace: ["casual"], vibe: ["aventurero"], genre: "leyendas", protagonist: "amigos", format: ["corto"], passage: "Parece que los gitanos solamente nacieron en el mundo para hurtar.", reason: "Romance caballeresco lleno de gracia y enredos.", category: "Clásico Universal" },
+      { id: "b_91", title: "El viejo y el mar", author: "Ernest Hemingway", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["reflexivo", "aventurero"], genre: "aventura", protagonist: "solitario", format: ["corto"], passage: "Era un viejo que pescadaba solo en un bote en la Corriente del Golfo.", reason: "Una lección imborrable sobre la dignidad y la perseverancia.", category: "Clásico Universal" },
+      { id: "b_92", title: "Rebelión en la granja", author: "George Orwell", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "criaturas", format: ["corto"], passage: "Todos los animales son iguales, pero algunos animales son más iguales.", reason: "Fábula satírica contra la tiranía y la corrupción.", category: "Clásico Universal" },
+      { id: "b_93", title: "1984", author: "George Orwell", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "solitario", format: ["medio"], passage: "El Gran Hermano te vigila.", reason: "La distopía definitiva sobre el poder del lenguaje y el control.", category: "Clásico Universal" },
+      { id: "b_94", title: "Fahrenheit 451", author: "Ray Bradbury", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "scifi", protagonist: "solitario", format: ["medio"], passage: "Era un placer quemar.", reason: "Defensa feroz de los libros frente a la censura social.", category: "Clásico Ciencia Ficción" },
+      { id: "b_95", title: "El gran Gatsby", author: "F. Scott Fitzgerald", ages: ["18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "solitario", format: ["medio"], passage: "En mi juventud, mi padre me dio un consejo que no he dejado de rumiar.", reason: "El gran retrato de los excesos y la ilusión americana.", category: "Clásico Universal" },
+      { id: "b_96", title: "Matar a un ruiseñor", author: "Harper Lee", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["reflexivo"], genre: "crecimiento", protagonist: "amigos", format: ["medio", "largo"], passage: "Cuando un niño te pida algo, haz el favor de dárselo si puedes.", reason: "Justicia, empatía y racismo vistos a través de ojos infantiles.", category: "Clásico Universal" },
+      { id: "b_97", title: "La llamada de lo salvaje", author: "Jack London", ages: ["12-17", "18+"], pace: ["principiante", "casual"], vibe: ["aventurero"], genre: "aventura", protagonist: "criaturas", format: ["corto", "medio"], passage: "Buck no leía los periódicos, por lo que no se enteraba...", reason: "Aventura indómita en los helados parajes del Klondike.", category: "Clásico Universal" },
+      { id: "b_98", title: "Colmillo Blanco", author: "Jack London", ages: ["12-17", "18+"], pace: ["casual"], vibe: ["aventurero"], genre: "aventura", protagonist: "criaturas", format: ["medio"], passage: "Darkness reigned over the frozen waste... La oscuridad reinaba.", reason: "El fascinante paso de la salvaje naturaleza al afecto humano.", category: "Clásico Universal" },
+      { id: "b_99", title: "La isla del tesoro", author: "Robert Louis Stevenson", ages: ["5-11", "12-17"], pace: ["casual", "avido"], vibe: ["aventurero"], genre: "aventura", protagonist: "solitario", format: ["medio"], passage: "El viejo marinero de la gabán marrón llegó arrastrando su cofre.", reason: "La novela de piratas, mapas y ambición por excelencia.", category: "Clásico Universal" },
+      { id: "b_100", title: "Drácula", author: "Bram Stoker", ages: ["12-17", "18+"], pace: ["casual", "avido"], vibe: ["oscuro", "misterioso"], genre: "misterio", protagonist: "amigos", format: ["largo"], passage: "3 de mayo. Bistritz. —Dejé Munich a las 8:35 del 1 de mayo.", reason: "El mito definitivo del vampiro narrado mediante diarios y cartas.", category: "Clásico Universal" }
+    ];
+
+    let currentStep = 0;
+    const userAnswers = {};
+    let rankedRecommendations = [];
+    let currentRecIndex = 0;
 
     const surveyQuestions = [
       {
@@ -409,29 +523,6 @@
       }
     ];
 
-    let currentStep = 0;
-    const userAnswers = {};
-    let rankedRecommendations = [];
-    let currentRecIndex = 0;
-
-    async function loadCatalog() {
-      try {
-        const response = await fetch('./libros.json');
-        if (!response.ok) throw new Error("No se pudo cargar libros.json");
-        booksCatalog = await response.json();
-        
-        document.getElementById("loadingBox").style.display = "none";
-        document.getElementById("questionTitle").style.display = "block";
-        document.getElementById("progressWrapper").style.display = "block";
-        renderQuestion();
-      } catch (err) {
-        document.getElementById("loadingBox").innerHTML = `
-          <p style="color:#f87171;">⚠️ No se encontró el archivo <code>libros.json</code>.</p>
-          <p style="font-size:0.85rem; margin-top:8px;">Asegúrate de colocar <b>libros.json</b> en la misma carpeta que este <b>index.html</b> en tu repositorio.</p>
-        `;
-      }
-    }
-
     function renderQuestion() {
       const q = surveyQuestions[currentStep];
       document.getElementById("questionTitle").textContent = q.title;
@@ -465,7 +556,7 @@
     }
 
     function calculateRecommendations() {
-      // FILTRO ESTRICTO DE EDAD: Si el libro no incluye la edad seleccionada, se descarta por completo
+      // Filtro estricto de edad para que Stephen King y otros adultos jamás aparezcan a niños
       const catalogFiltrado = booksCatalog.filter(b => {
         if (!b.ages) return true;
         return b.ages.includes(userAnswers.age);
@@ -483,12 +574,12 @@
       });
 
       rankedRecommendations.sort((a, b) => b.matchScore - a.matchScore);
-      rankedRecommendations = rankedRecommendations.slice(0, 20);
-
-      // Si por alguna razón el filtro estricto deja pocos resultados, respaldamos con todo el catálogo
+      
       if (rankedRecommendations.length === 0) {
-        rankedRecommendations = booksCatalog.slice(0, 10);
+        rankedRecommendations = booksCatalog.filter(b => b.ages.includes("18+"));
       }
+
+      rankedRecommendations = rankedRecommendations.slice(0, 20);
 
       currentRecIndex = 0;
       document.getElementById("quizBox").style.display = "none";
@@ -511,8 +602,8 @@
       }
       document.getElementById("resAuthor").textContent = `por ${autorMostrado}`;
       
-      document.getElementById("resPassage").textContent = `"${book.passage || 'Una obra indispensable para descubrir nuevas perspectivas.'}"`;
-      document.getElementById("resReason").textContent = book.reason || "Coincide con tus preferencias de género y ritmo de lectura.";
+      document.getElementById("resPassage").textContent = `"${book.passage || 'Una obra indispensable.'}"`;
+      document.getElementById("resReason").textContent = book.reason || "Coincide con tus preferencias.";
       
       let tituloLimpio = book.title.split('/')[0].replace(/\(Ed\..*?\)/g, '').trim();
       const querySearch = encodeURIComponent(`${tituloLimpio} ${autorMostrado}`);
@@ -545,7 +636,8 @@
       renderQuestion();
     }
 
-    loadCatalog();
+    document.getElementById("progressWrapper").style.display = "block";
+    renderQuestion();
   </script>
 </body>
 </html>
